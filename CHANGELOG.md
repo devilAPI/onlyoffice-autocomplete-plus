@@ -2,7 +2,7 @@
 
 ## 1.6.0
 
-* Learn from use: the words you choose are suggested first. Can be switched off and reset in the settings.
+* Learn from use: the words you choose are suggested first. Can be switched off, viewed and reset in the settings.
 
 ## 1.5.0
 

@@ -61,7 +61,7 @@ To stop a word from being suggested, right-click it in the list of suggestions. 
 
 ### Learned words
 
-Each time you choose a suggestion, the plugin remembers it and shows it earlier the next time: the more often you pick a word, the higher it appears. Click **Reset** next to *Learned words* in the settings window to forget them all.
+Each time you choose a suggestion, the plugin remembers it and shows it earlier the next time: the more often you pick a word, the higher it appears. In the settings window, **View** next to *Learned words* lists them with the number of times you chose each, and **Reset** forgets them all.
 
 The settings, both word lists and the learned words are stored in the editor on your device.
 

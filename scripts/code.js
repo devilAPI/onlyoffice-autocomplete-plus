@@ -321,9 +321,52 @@
 		g_listDraft = null;
 	}
 
+	// the learned words with the number of times they were chosen, most chosen first
+	function getLearnedText()
+	{
+		var words = Object.keys(g_usage);
+		words.sort(function(a, b) { return (g_usage[b] - g_usage[a]) || (a < b ? -1 : 1); });
+		for (var i = 0; i < words.length; i++)
+		{
+			var record = g_words[words[i]];
+			words[i] = (record ? record.text : words[i]) + "  (" + g_usage[words[i]] + ")";
+		}
+		return words.join("\n");
+	}
+
 	function openList(name)
 	{
-		if (g_listWindow || !g_lists[name])
+		if (g_listWindow)
+			return;
+
+		if (name == "learned")
+		{
+			g_listName = name;
+			g_listDraft = null;
+			g_listWindow = new window.Asc.PluginWindow();
+			g_listWindow.attachEvent("onInit", function() {
+				if (g_listWindow)
+				{
+					g_listWindow.command("onList", {
+						description : window.Asc.plugin.tr("The words you have chosen and how often, most chosen first."),
+						text : getLearnedText(),
+						readOnly : true
+					});
+				}
+			});
+			g_listWindow.show({
+				url : "wordlist.html",
+				description : window.Asc.plugin.tr("Learned words"),
+				isVisual : true,
+				isModal : true,
+				buttons : [ { text : window.Asc.plugin.tr("Close"), primary : true } ],
+				EditorsSupport : ["word", "slide", "cell", "pdf"],
+				size : [320, 340]
+			});
+			return;
+		}
+
+		if (!g_lists[name])
 			return;
 
 		var variation = {
@@ -481,7 +524,7 @@
 		{
 			if (g_listWindow && g_listWindow.id === windowId)
 			{
-				if (id === 0 && g_listDraft !== null)
+				if (id === 0 && g_listDraft !== null && g_lists[g_listName])
 					saveList(g_listName, g_listDraft);
 				closeList();
 			}

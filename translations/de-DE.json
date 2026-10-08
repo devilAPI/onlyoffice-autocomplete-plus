@@ -18,5 +18,8 @@
 	"Words that are never suggested, one per line.": "Wörter, die nie vorgeschlagen werden, eines pro Zeile.",
 	"Show the words I choose first": "Gewählte Wörter zuerst anzeigen",
 	"Learned words": "Gelernte Wörter",
-	"Reset": "Zurücksetzen"
+	"Reset": "Zurücksetzen",
+	"View": "Anzeigen",
+	"Close": "Schließen",
+	"The words you have chosen and how often, most chosen first.": "Die gewählten Wörter und wie oft, die häufigsten zuerst."
 }
