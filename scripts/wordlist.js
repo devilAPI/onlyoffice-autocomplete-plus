@@ -37,6 +37,7 @@
 
 		window.Asc.plugin.attachEvent("onList", function(list) {
 			document.getElementById("description").innerText = list.description;
+			document.getElementById("hint").innerText = list.hint || "";
 			words.value = list.text;
 			words.focus();
 		});

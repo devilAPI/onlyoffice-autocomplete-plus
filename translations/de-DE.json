@@ -19,5 +19,8 @@
 	"Show the words I choose first": "Gewählte Wörter zuerst anzeigen",
 	"Learned words": "Gelernte Wörter",
 	"Reset": "Zurücksetzen",
-	"The words you have chosen and how often, most chosen first. Delete a line to forget the word.": "Die gewählten Wörter und wie oft, die häufigsten zuerst. Zeile löschen, um das Wort zu vergessen."
+	"The words you have chosen, most chosen first.": "Die gewählten Wörter, die häufigsten zuerst.",
+	"A word cannot contain spaces. Delete a line to remove the word.": "Ein Wort darf keine Leerzeichen enthalten. Zeile löschen, um das Wort zu entfernen.",
+	"Right-click a suggestion while typing to add it here. Delete a line to have the word suggested again.": "Beim Tippen mit der rechten Maustaste auf einen Vorschlag klicken, um ihn hier hinzuzufügen. Zeile löschen, damit das Wort wieder vorgeschlagen wird.",
+	"The number in brackets is how often you chose the word; a higher number moves it up. Delete a line to forget the word.": "Die Zahl in Klammern gibt an, wie oft das Wort gewählt wurde; eine höhere Zahl schiebt es nach oben. Zeile löschen, um das Wort zu vergessen."
 }

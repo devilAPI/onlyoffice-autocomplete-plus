@@ -53,6 +53,7 @@
 			key : "onlyoffice_autocomplete_personal",
 			title : "Personal dictionary",
 			description : "Your own words, one per line. They are suggested first and written exactly as entered.",
+			hint : "A word cannot contain spaces. Delete a line to remove the word.",
 			words : []
 		},
 		// never suggested
@@ -60,6 +61,7 @@
 			key : "onlyoffice_autocomplete_ignored",
 			title : "Ignored words",
 			description : "Words that are never suggested, one per line.",
+			hint : "Right-click a suggestion while typing to add it here. Delete a line to have the word suggested again.",
 			words : []
 		}
 	};
@@ -358,7 +360,8 @@
 
 		var list = (name == "learned") ? {
 			title : "Learned words",
-			description : "The words you have chosen and how often, most chosen first. Delete a line to forget the word."
+			description : "The words you have chosen, most chosen first.",
+			hint : "The number in brackets is how often you chose the word; a higher number moves it up. Delete a line to forget the word."
 		} : g_lists[name];
 		if (!list)
 			return;
@@ -373,7 +376,7 @@
 				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
 			],
 			EditorsSupport : ["word", "slide", "cell", "pdf"],
-			size : [320, 340]
+			size : [320, 380]
 		};
 
 		g_listName = name;
@@ -384,6 +387,7 @@
 			{
 				g_listWindow.command("onList", {
 					description : window.Asc.plugin.tr(list.description),
+					hint : window.Asc.plugin.tr(list.hint),
 					text : (name == "learned") ? getLearnedText() : list.words.join("\n")
 				});
 			}
