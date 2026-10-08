@@ -1,45 +1,69 @@
-# Autocomplete plugin (German and English)
+# Autocomplete for ONLYOFFICE - German and English
 
-An input assistant for ONLYOFFICE editors that suggests German and English words while you type.
+A plugin for ONLYOFFICE editors that suggests German and English words while you type, most common words first. It works in documents, spreadsheets, presentations and PDFs.
 
-> **This is a fork** of the Autocomplete plugin from [ONLYOFFICE/onlyoffice.github.io](https://github.com/ONLYOFFICE/onlyoffice.github.io/tree/master/sdkjs-plugins/content/autocomplete). The original plugin is the work of Ascensio System SIA and the ONLYOFFICE contributors; this repository keeps its history and adds the changes described below.
+> **This is a fork** of the Autocomplete plugin from [ONLYOFFICE/onlyoffice.github.io](https://github.com/ONLYOFFICE/onlyoffice.github.io/tree/master/sdkjs-plugins/content/autocomplete). The original plugin is the work of Ascensio System SIA and the ONLYOFFICE contributors. This repository keeps its history and adds the features below.
 
 ## Fork features
 
-* **German and English suggestions** from one combined word list of about 258,000 words (189,000 German, 78,000 English).
-* **Most common words first.** Suggestions are ranked by how often a word is used instead of alphabetically, and the list is limited to the 30 best matches.
-* **German capitalisation.** Nouns and names are suggested with their capital letter (typing `hau` offers `Haus`); other words follow what you typed.
-* **Settings in the editor.** Switch German or English off, change how many letters you type before suggestions appear and how many are shown, and turn the German capitalisation off.
-* **PDF editor support.** The plugin is also offered in the PDF editor.
+| | Original plugin | This fork |
+|---|---|---|
+| Languages | English | German and English, each can be switched off |
+| Order of suggestions | Alphabetical | Most common words first |
+| German nouns | - | Suggested with a capital letter (`hau` → `Haus`) |
+| Settings | None | Settings window in the editor |
+| PDF editor | Not offered | Supported |
+| Interface language | English | English and German |
+
+* **German and English word list.** About 258,000 words (189,000 German, 78,000 English) in one list, including inflected forms.
+* **Ranked by frequency.** Suggestions are ordered by how often a word is used, so `gesch` offers `Geschichte` and `geschafft` before rare words.
+* **German capitalisation.** Nouns and names are suggested with their capital letter. Other words follow what you typed.
+* **Settings in the editor.** Choose the languages, the number of letters before suggestions appear, the number of suggestions, and whether German nouns are capitalised.
+* **PDF editor support.** The plugin is also offered when you edit a PDF.
 * **Fixes.** The original lookup skipped every second matching word and sorted the whole dictionary again on every keystroke.
 
-## How to use
+## Installation
 
-1. Start typing and the plugin will suggest variants for you once you have typed three letters (this can be changed in the settings).
-2. Click on the variant you want to be inserted into your doc.
+1. Download [autocomplete.plugin](deploy/autocomplete.plugin).
+2. If the original Autocomplete plugin is installed, remove it first in *Plugins → Plugin Manager*.
+3. In the editor, open *Plugins → Plugin Manager → Available plugins → Install plugin manually* and select the downloaded file.
+4. Restart the editor.
+
+The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/DesktopEditors) and [self-hosted](https://github.com/ONLYOFFICE/DocumentServer) versions of ONLYOFFICE editors. For ONLYOFFICE Docs, see the [installation instructions](https://api.onlyoffice.com/docs/plugin-and-macros/tutorials/installing/onlyoffice-docs-on-premises/) in the ONLYOFFICE API documentation.
+
+## Usage
+
+1. Start typing. After three letters a list of suggestions appears.
+2. Click the word you want, or keep typing to narrow the list.
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
 
 ## Settings
 
-Click the **Autocomplete** button on the Plugins tab, or right-click in the document and choose **Autocomplete settings**:
+Click the **Autocomplete** button on the Plugins tab, or right-click in the document and choose **Autocomplete settings**.
 
-* **German / English** - the languages to suggest words from.
-* **Capitalise German nouns** - suggest `Haus` when you type `hau`.
-* **Letters before suggesting** - how many letters you type before the suggestions appear (1 to 6, default 3).
-* **Maximum number of suggestions** - 1 to 100, default 30.
+| Setting | Meaning | Default |
+|---|---|---|
+| German | Suggest German words | On |
+| English | Suggest English words | On |
+| Capitalise German nouns | Suggest `Haus` when you type `hau` | On |
+| Letters before suggesting | Letters you type before the suggestions appear, 1 to 6 | 3 |
+| Maximum number of suggestions | 1 to 100 | 30 |
 
 The settings are stored in the editor on your device.
 
-## How to install
+## Development
 
-Download [autocomplete.plugin](deploy/autocomplete.plugin) and add it in the editor via *Plugins → Plugin Manager → Available plugins → Install plugin manually*. If the original Autocomplete plugin is installed, remove it first.
+| Path | Content |
+|---|---|
+| `scripts/code.js` | The background plugin: word lookup, settings, toolbar button and context menu item |
+| `settings.html`, `scripts/settings.js` | The settings window |
+| `dictionaries/words.txt` | The word list |
+| `translations/` | Interface translations |
+| `tools/build_words.py` | Builds the word list |
+| `deploy/autocomplete.plugin` | The installable package |
 
-The plugin is compatible with [self-hosted](https://github.com/ONLYOFFICE/DocumentServer) and [desktop](https://github.com/ONLYOFFICE/DesktopEditors) versions of ONLYOFFICE editors. Instructions for ONLYOFFICE Docs can be found in the [ONLYOFFICE API documentation](https://api.onlyoffice.com/docs/plugin-and-macros/tutorials/installing/onlyoffice-docs-on-premises/).
-
-## Rebuilding the word list
-
-`dictionaries/words.txt` lists one word per line, most frequent first, with a marker for words that are only German or only English. It is built from the sources below with:
+`dictionaries/words.txt` lists one word per line, most frequent first. A tab followed by `d` or `e` marks a word as only German or only English. Rebuild it from the sources listed under Credits with:
 
 ```
 python3 tools/build_words.py
