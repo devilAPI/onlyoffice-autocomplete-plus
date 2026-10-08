@@ -628,17 +628,17 @@
 			}
 
 			// the editor's input still holds the typed letters
-			g_typedBase += written;
 			g_staleText = g_editorText;
-			setTyped(g_typedBase);
 		}
 		else
 		{
-			// the editor's input becomes the written word
+			// the editor adds the written word to its input and keeps the typed letters in it
 			window.Asc.plugin.executeMethod("InputText", [item.text, typed]);
-			setTyped(g_typedBase + written);
+			g_staleText = g_editorText + written;
 		}
 
+		g_typedBase += written;
+		setTyped(g_typedBase);
 		g_accepted = written;
 		window.Asc.plugin.getInputHelper().unShow();
 	};
