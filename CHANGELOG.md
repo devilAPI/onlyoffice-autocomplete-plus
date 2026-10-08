@@ -3,6 +3,7 @@
 ## 1.6.0
 
 * Learn from use: the words you choose are suggested first. Can be switched off, edited and reset in the settings.
+* Add a short explanation to the edit windows of the personal dictionary, the ignored words and the learned words.
 
 ## 1.5.0
 
