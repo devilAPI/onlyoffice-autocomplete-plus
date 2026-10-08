@@ -3,6 +3,7 @@
 ## 1.5.0
 
 * Add ignored words: words that are never suggested. Right-click a suggestion to ignore it, or edit the list in the settings.
+* Fix the selected suggestion not being written in text boxes in the PDF editor; in the desktop editors German nouns are now capitalised in PDFs too.
 
 ## 1.4.0
 

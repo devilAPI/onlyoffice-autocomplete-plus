@@ -35,7 +35,7 @@ The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/Deskto
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
 
-In the PDF editor a plugin cannot replace text you have typed, so there the suggestion completes the word in the case you typed it: German nouns are not capitalised for you.
+In the PDF editor of the self-hosted version a plugin cannot replace text you have typed, so there the suggestion completes the word in the case you typed it: German nouns are not capitalised for you. The desktop editors are not affected.
 
 ## Settings
 

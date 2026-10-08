@@ -342,6 +342,41 @@
 		return !!window.Asc.plugin.info && window.Asc.plugin.info.editorType === "pdf";
 	}
 
+	// The editor API of the PDF editor, if the plugin can reach it (it can in the
+	// desktop editors, where the plugin and the editor are loaded from files).
+	function getPdfApi()
+	{
+		try
+		{
+			var api = window.parent.Asc.editor;
+			if (api && typeof api.asc_correctEnterText === "function" && typeof api.asc_enterText === "function")
+				return api;
+		}
+		catch (err)
+		{
+		}
+		return null;
+	}
+
+	// whether choosing a suggestion can change the letters that are already typed
+	function canReplaceTyped()
+	{
+		return !isPdfEditor() || null !== getPdfApi();
+	}
+
+	function getCodePoints(text)
+	{
+		var result = [];
+		for (var i = 0; i < text.length; i++)
+		{
+			var code = text.codePointAt(i);
+			result.push(code);
+			if (code > 0xFFFF)
+				i++;
+		}
+		return result;
+	}
+
 	window.isInit = false;
 
 	window.Asc.plugin.init = function(text)
@@ -402,11 +437,20 @@
 
 		if (isPdfEditor())
 		{
-			// InputText does nothing in the PDF editor, so the typed letters
-			// cannot be replaced: add the rest of the word instead
-			var rest = item.text.substr(window.Asc.plugin.currentText.length);
-			if (rest)
+			// InputText does nothing in the PDF editor
+			var typed = window.Asc.plugin.currentText;
+			var rest = item.text.substr(typed.length);
+			var api = getPdfApi();
+			if (api)
+			{
+				if (false === api.asc_correctEnterText(getCodePoints(typed), getCodePoints(item.text)) && rest)
+					api.asc_enterText(getCodePoints(rest));
+			}
+			else if (rest)
+			{
+				// the typed letters cannot be replaced: add the rest of the word
 				window.Asc.plugin.executeMethod("PasteText", [rest]);
+			}
 			window.Asc.plugin.currentText = "";
 		}
 		else
@@ -514,7 +558,7 @@
 				continue;
 			personal[key] = true;
 			// written as entered, unless it is all lower case or the typed letters cannot be replaced
-			if (words[p] != key && !isPdfEditor())
+			if (words[p] != key && canReplaceTyped())
 				ret.push(words[p]);
 			else
 				ret.push(text + words[p].substr(textFound.length));
@@ -542,8 +586,7 @@
 		{
 			var word = found[i].text;
 			// nouns and names keep their capital letter, everything else follows the typed text
-			// (not in the PDF editor, where the typed letters cannot be replaced)
-			if (g_settings.capitalize && g_settings.german && !isPdfEditor() && word.charAt(0) != word.charAt(0).toLowerCase())
+			if (g_settings.capitalize && g_settings.german && canReplaceTyped() && word.charAt(0) != word.charAt(0).toLowerCase())
 				ret.push(word);
 			else
 				ret.push(text + word.substr(textFound.length));
