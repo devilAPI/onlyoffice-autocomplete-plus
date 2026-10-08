@@ -471,6 +471,12 @@
 		return null;
 	}
 
+	function isTextDocument()
+	{
+		var info = window.Asc.plugin.info;
+		return !!info && info.editorType === "word" && !isPdfEditor();
+	}
+
 	// whether choosing a suggestion can change the letters that are already typed
 	function canReplaceTyped()
 	{
@@ -506,6 +512,15 @@
 			window.Asc.plugin.attachToolbarMenuClickEvent("autocompleteSettings", openSettings);
 			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
 			registerMenus();
+
+			// a text document can be asked for the text in front of the cursor (editors since 7.4)
+			if (isTextDocument())
+			{
+				window.Asc.plugin.executeMethod("GetCurrentSentence", ["beforeCursor"], function(text) {
+					// an editor that does not know the method answers nothing at all
+					g_readsDocument = (text !== undefined);
+				});
+			}
 
 			// While the suggestions are shown the editor does not report backspace,
 			// so watch the keys of the editor window where the plugin can reach it
@@ -568,11 +583,20 @@
 		this.executeCommand("close", "");
 	};
 	
-	// What was typed since the cursor was last moved, as far as the plugin knows.
-	// The editor reports only the letters typed since it last cleared its input,
-	// which it does after a space, after backspace and after a suggestion is
+	// The word in front of the cursor.
+	//
+	// A text document is asked for it each time something is typed or deleted
+	// (readWord), so it is what really stands there, whatever happened before:
+	// a space, backspace, a chosen suggestion, a click into another word.
+	//
+	// The other editors cannot be asked. There the plugin keeps what was typed
+	// since the cursor was last moved, as far as it knows. The editor reports
+	// only the letters typed since it last cleared its input, which it does
+	// after a space, after backspace or Delete and after a suggestion is
 	// written; the plugin keeps the text typed before that itself, so that the
 	// word in front of the cursor is still known afterwards.
+	var g_readsDocument = false; // the document can be asked
+	var g_readId = 0;       // the last time it was asked: earlier answers are outdated
 	var g_typed = "";       // everything typed, ends in the current word
 	var g_typedBase = "";   // the part of it typed before the editor's current input
 	var g_editorText = "";  // the editor's current input
@@ -580,6 +604,7 @@
 	var g_accepted = "";    // the suggestion that was just written
 	var g_inputTime = 0;
 	var g_backspaceTime = 0;
+	var g_deleteTime = 0;
 
 	function setTyped(text)
 	{
@@ -595,10 +620,77 @@
 		setTyped("");
 	}
 
+	// the last word of a text: what follows the last space, full stop or comma
+	function getLastWord(text)
+	{
+		return (typeof text === "string") ? /[^\s.,]*$/.exec(text)[0] : "";
+	}
+
+	// asks the document for the word in front of the cursor
+	function readWord(callback)
+	{
+		var id = ++g_readId;
+		window.Asc.plugin.executeMethod("GetCurrentSentence", ["beforeCursor"], function(text) {
+			// outdated if more was typed or the cursor has moved since
+			if (id !== g_readId)
+				return;
+
+			if (typeof text === "string")
+			{
+				callback(getLastWord(text));
+				return;
+			}
+
+			// no text is returned for a sentence with a picture in it: ask for the word alone
+			window.Asc.plugin.executeMethod("GetCurrentWord", ["beforeCursor"], function(word) {
+				if (id === g_readId)
+					callback(getLastWord(word));
+			});
+		});
+	}
+
+	function onWordRead(word)
+	{
+		window.Asc.plugin.currentText = word;
+		suggestTyped();
+	}
+
+	function suggestTyped()
+	{
+		// no suggestions for the word that was just chosen
+		if (g_accepted && g_accepted.toLowerCase() === window.Asc.plugin.currentText.toLowerCase())
+		{
+			window.Asc.plugin.getInputHelper().unShow();
+			return;
+		}
+		g_accepted = "";
+
+		showSuggestions();
+	}
+
 	window.Asc.plugin.inputHelper_onSelectItem = function(item)
 	{
 		if (!item || !window.Asc.plugin.ih.isVisible)
 			return;
+
+		if (g_readsDocument)
+		{
+			// write only if the word the suggestions were made for still stands in front of the cursor
+			var shown = window.Asc.plugin.currentText;
+			readWord(function(word) {
+				if (word !== shown)
+				{
+					onWordRead(word);
+					return;
+				}
+
+				recordUse(item.text);
+				window.Asc.plugin.executeMethod("InputText", [item.text, word]);
+				g_accepted = item.text;
+				window.Asc.plugin.getInputHelper().unShow();
+			});
+			return;
+		}
 
 		recordUse(item.text);
 
@@ -647,21 +739,53 @@
 	{
 		if (e && e.keyCode === 8)
 			g_backspaceTime = Date.now();
+		if (e && e.keyCode === 46)
+			g_deleteTime = Date.now();
 	}
 
+	// The editor clears its input for many reasons: backspace, Delete, a typed
+	// space, the cursor keys, Enter, and half a second after the window gets the
+	// focus. It does not say which one it was.
 	window.Asc.plugin.event_onInputHelperClear = function()
 	{
 		var isBackspace = (Date.now() - g_backspaceTime) < 500;
-		g_backspaceTime = 0;
+		var isDelete = (Date.now() - g_deleteTime) < 500;
+
+		if (g_readsDocument)
+		{
+			if (isBackspace)
+			{
+				readWord(onWordRead);
+			}
+			else if (!isDelete) // Delete leaves the word in front of the cursor as it is
+			{
+				// the word has ended or the cursor may have moved: wait for the next letter
+				g_readId++;
+				g_accepted = "";
+				window.Asc.plugin.currentText = "";
+				window.Asc.plugin.getInputHelper().unShow();
+			}
+			return;
+		}
+
 		g_editorText = "";
 		g_staleText = "";
 
 		if (isBackspace)
 		{
+			g_backspaceTime = 0;
 			g_accepted = "";
 			g_typedBase = g_typed.slice(0, -1);
 			setTyped(g_typedBase);
 			showSuggestions();
+			return;
+		}
+
+		// Delete leaves the text in front of the cursor as it is
+		if (isDelete)
+		{
+			g_deleteTime = 0;
+			g_typedBase = g_typed;
 			return;
 		}
 
@@ -679,6 +803,12 @@
 
 	window.Asc.plugin.event_onInputHelperInput = function(data)
 	{
+		if (g_readsDocument)
+		{
+			readWord(onWordRead);
+			return;
+		}
+
 		if (data.add)
 		{
 			setTyped(g_typed + data.text);
@@ -695,15 +825,7 @@
 		}
 		g_inputTime = Date.now();
 
-		// no suggestions for the word that was just chosen
-		if (g_accepted && g_accepted.toLowerCase() === window.Asc.plugin.currentText.toLowerCase())
-		{
-			window.Asc.plugin.getInputHelper().unShow();
-			return;
-		}
-		g_accepted = "";
-
-		showSuggestions();
+		suggestTyped();
 	};
 
 	function showSuggestions()

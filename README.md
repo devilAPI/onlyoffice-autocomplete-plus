@@ -36,6 +36,8 @@ The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/Deskto
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
 
+In text documents the plugin reads the word in front of the cursor from the document, so the suggestions follow you when you delete letters or click into a word typed earlier. Spreadsheets, presentations and PDFs do not offer that: there the plugin knows only what you typed since you last moved the cursor.
+
 In the PDF editor of the self-hosted version a plugin cannot replace text you have typed, so there the suggestion completes the word in the case you typed it: German nouns are not capitalised for you. The desktop editors are not affected.
 
 ## Settings

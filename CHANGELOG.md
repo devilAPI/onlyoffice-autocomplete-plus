@@ -2,7 +2,10 @@
 
 ## 1.6.1
 
-* Fix the suggestions starting again after backspace: the plugin now remembers what was typed, so deleting letters continues the word, also after a space or after a suggestion was chosen.
+* Fix the suggestions starting again after backspace: deleting letters continues the word in front of the cursor, also after a space or after a suggestion was chosen. In text documents the plugin now reads that word from the document instead of remembering what was typed.
+* Fix the word in front of the cursor being forgotten after the Delete key.
+* In text documents, suggest for a word typed earlier when you click into it and go on typing.
+* In text documents, fix a chosen suggestion overwriting other text when the cursor was moved with the mouse while the list was shown.
 * No longer suggest the word that is already typed in full, and do not reopen the list right after a suggestion was chosen.
 
 ## 1.6.0
