@@ -63,6 +63,8 @@ Click the **Autocomplete** button on the Plugins tab, or right-click in the docu
 
 In the settings window, click **Edit** next to *Personal dictionary* and enter your own words, one per line: names, technical terms, abbreviations. They are suggested before all other words and written exactly as you entered them, so `onl` offers `OnlyOffice`.
 
+To add a word from your text, select it, right-click and choose **Add "…" to personal dictionary**. The item appears when a single word is selected that is not in the personal dictionary yet. If the word was among the ignored words, it is removed from them.
+
 ### Ignored words
 
 To stop a word from being suggested, right-click it in the list of suggestions. To review the ignored words or bring one back, click **Edit** next to *Ignored words* in the settings window.

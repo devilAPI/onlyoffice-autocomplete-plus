@@ -154,6 +154,21 @@
 		onCountsChanged();
 	}
 
+	function hasPersonal(word)
+	{
+		const key = word.toLowerCase();
+		return lists.personal.some(entry => entry.toLowerCase() == key);
+	}
+
+	// an ignored word would not be suggested, so it is taken from the ignored words
+	function addPersonal(word)
+	{
+		const key = word.toLowerCase();
+		if (ignored.has(key))
+			saveList("ignored", lists.ignored.filter(entry => entry.toLowerCase() != key).join("\n"));
+		saveList("personal", lists.personal.concat([word]).join("\n"));
+	}
+
 	function ignore(word)
 	{
 		saveList("ignored", lists.ignored.concat([word.toLowerCase()]).join("\n"));
@@ -244,6 +259,8 @@
 		// the personal dictionary and the ignored words, by name
 		getList : name => lists[name],
 		saveList : saveList,
+		hasPersonal : hasPersonal,
+		addPersonal : addPersonal,
 		isIgnored : key => ignored.has(key),
 		ignore : ignore,
 

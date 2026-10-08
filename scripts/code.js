@@ -35,11 +35,14 @@
 	// settings into the menus of the editor.
 
 	const plugin = window.Asc.plugin;
+	const store = window.Autocomplete.store;
 	const dictionary = window.Autocomplete.dictionary;
+	const editor = window.Autocomplete.editor;
 	const typing = window.Autocomplete.typing;
 	const windows = window.Autocomplete.windows;
 
 	let isStarted = false;
+	let selectedWord = ""; // the word the context menu offers to add to the personal dictionary
 
 	dictionary.load("./dictionaries/words.txt");
 
@@ -64,19 +67,40 @@
 		}]);
 	}
 
-	// and so does an item in the context menu, where another one pauses the suggestions
+	// and so does an item in the context menu, where another one pauses the
+	// suggestions and a third one adds the selected word to the personal dictionary
+	function addContextMenu(word)
+	{
+		const items = [{
+			id : "autocompletePauseMenu",
+			text : plugin.tr(typing.isPaused() ? "Resume autocomplete" : "Pause autocomplete")
+		}, {
+			id : "autocompleteSettingsMenu",
+			text : plugin.tr("Autocomplete settings")
+		}];
+
+		selectedWord = (word && !store.hasPersonal(word)) ? word : "";
+		if (selectedWord)
+		{
+			items.unshift({
+				id : "autocompleteAddWordMenu",
+				text : plugin.tr("Add \"%1\" to personal dictionary").replace("%1", () => selectedWord)
+			});
+		}
+
+		plugin.executeMethod("AddContextMenuItem", [{ guid : plugin.guid, items : items }]);
+	}
+
+	// The editor shows its context menu when the plugin has added its items,
+	// so the selected text can be asked for first.
 	plugin.event_onContextMenuShow = function(options)
 	{
-		plugin.executeMethod("AddContextMenuItem", [{
-			guid : plugin.guid,
-			items : [{
-				id : "autocompletePauseMenu",
-				text : plugin.tr(typing.isPaused() ? "Resume autocomplete" : "Pause autocomplete")
-			}, {
-				id : "autocompleteSettingsMenu",
-				text : plugin.tr("Autocomplete settings")
-			}]
-		}]);
+		// nothing is selected where the menu is opened at the cursor, and no text in a picture
+		const type = options && options.type;
+		if (type === "Target" || type === "Image" || type === "OleObject")
+			addContextMenu("");
+		else
+			editor.getSelectedWord(addContextMenu);
 	};
 
 	plugin.init = function(text)
@@ -90,6 +114,10 @@
 
 		plugin.attachToolbarMenuClickEvent("autocompleteSettings", windows.openSettings);
 		plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", windows.openSettings);
+		plugin.attachContextMenuClickEvent("autocompleteAddWordMenu", function() {
+			if (selectedWord)
+				store.addPersonal(selectedWord);
+		});
 		plugin.attachContextMenuClickEvent("autocompletePauseMenu", function() {
 			typing.setPaused(!typing.isPaused());
 		});

@@ -35,6 +35,9 @@
 
 	const plugin = window.Asc.plugin;
 
+	const SELECTION_TIMEOUT = 300; // milliseconds
+	const WORD_EDGE = /^[\s.,;:!?"'()\[\]{}«»„“”‚‘’…]+|[\s.,;:!?"'()\[\]{}«»„“”‚‘’…]+$/g;
+
 	function isPdf()
 	{
 		// the PDF editor is built on the document editor and reports itself as "word" with the sub type "pdf"
@@ -96,11 +99,39 @@
 		return typed + rest;
 	}
 
+	// the text without the spaces and punctuation around it if it is a single word, "" otherwise
+	function getSingleWord(text)
+	{
+		if (typeof text !== "string")
+			return "";
+
+		const word = text.replace(WORD_EDGE, "");
+		return (word.length < 2 || word.length > 50 || /[\s,;]/.test(word)) ? "" : word;
+	}
+
+	// Answers with the selected word, or with "" if anything else is selected.
+	function getSelectedWord(callback)
+	{
+		let isAnswered = false;
+		function answer(text)
+		{
+			if (isAnswered)
+				return;
+			isAnswered = true;
+			callback(getSingleWord(text));
+		}
+
+		plugin.executeMethod("GetSelectedText", [{ Numbering : false, Math : false }], answer);
+		// this is asked while the editor waits with its context menu: do not let it wait long
+		window.setTimeout(answer, SELECTION_TIMEOUT);
+	}
+
 	window.Autocomplete.editor = {
 		isPdf : isPdf,
 		isTextDocument : isTextDocument,
 		canReplaceTyped : canReplaceTyped,
-		completeInPdf : completeInPdf
+		completeInPdf : completeInPdf,
+		getSelectedWord : getSelectedWord
 	};
 
 })(window, undefined);

@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.10.0
+
+* Add the selected word to the personal dictionary from the right-click menu.
+
 ## 1.9.0
 
 * Add "Pause autocomplete" and "Resume autocomplete" to the right-click menu, to switch the suggestions off for a moment. The settings window has a button for it too.
