@@ -1,6 +1,12 @@
 {
 	"Autocomplete": "Autovervollständigung",
 	"Autocomplete settings": "Einstellungen der Autovervollständigung",
+	"Pause autocomplete": "Autovervollständigung pausieren",
+	"Resume autocomplete": "Autovervollständigung fortsetzen",
+	"Suggestions are switched on": "Vorschläge sind eingeschaltet",
+	"Suggestions are paused": "Vorschläge sind pausiert",
+	"Pause": "Pausieren",
+	"Resume": "Fortsetzen",
 	"OK": "OK",
 	"Cancel": "Abbrechen",
 	"Languages": "Sprachen",

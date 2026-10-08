@@ -37,6 +37,8 @@ The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/Deskto
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
 
+To switch the suggestions off for a moment, right-click in the document and choose **Pause autocomplete**; **Resume autocomplete** in the same menu brings them back. The settings window has a **Pause** button that does the same. The pause also ends when the editor is restarted.
+
 Deleting letters does not start over: the suggestions continue with the word in front of the cursor, also after a space or after a suggestion was chosen.
 
 In text documents the plugin reads that word from the document, so it also works when you click into a word typed earlier and go on typing. Spreadsheets, presentations and PDFs do not offer that: there the plugin knows only what you typed since you last moved the cursor, and starts a new word after you move it.

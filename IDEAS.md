@@ -15,7 +15,6 @@ Possible features, roughly in order of usefulness.
 ## More settings
 
 * **Minimum word length** - only suggest words that save at least a few keystrokes.
-* **Pause shortcut** - a key or toolbar toggle to switch suggestions off temporarily without opening the background-plugins list.
 * **More languages** - the build script already takes a language pair; French or Spanish would mostly be new word lists plus a checkbox each.
 
 ## Project housekeeping

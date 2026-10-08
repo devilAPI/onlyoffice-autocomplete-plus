@@ -33,6 +33,8 @@
 
 	const plugin = window.Asc.plugin;
 
+	let isPaused = false;
+
 	function getInputs()
 	{
 		return Array.from(document.querySelectorAll("#settings input"));
@@ -62,6 +64,13 @@
 		});
 	}
 
+	// these texts change, so they are translated here and not with the others
+	function showPaused()
+	{
+		document.getElementById("pauseState").innerText = plugin.tr(isPaused ? "Suggestions are paused" : "Suggestions are switched on");
+		document.getElementById("togglePause").innerText = plugin.tr(isPaused ? "Resume" : "Pause");
+	}
+
 	function onChange()
 	{
 		plugin.sendToPlugin("onChange", readSettings());
@@ -72,6 +81,10 @@
 		plugin.attachEvent("onSettings", function(settings) {
 			showSettings(settings);
 			onChange();
+		});
+		plugin.attachEvent("onPaused", function(paused) {
+			isPaused = paused;
+			showPaused();
 		});
 		plugin.attachEvent("onListCounts", function(counts) {
 			for (const name in counts)
@@ -87,10 +100,14 @@
 				plugin.sendToPlugin("onEditList", button.dataset.edit);
 			});
 		});
+		document.getElementById("togglePause").addEventListener("click", function() {
+			plugin.sendToPlugin("onTogglePause");
+		});
 		document.getElementById("resetLearned").addEventListener("click", function() {
 			plugin.sendToPlugin("onResetLearned");
 		});
 
+		showPaused();
 		plugin.sendToPlugin("onInit");
 	};
 
@@ -99,6 +116,7 @@
 		Array.from(document.querySelectorAll(".i18n")).forEach(function(element) {
 			element.innerText = plugin.tr(element.innerText);
 		});
+		showPaused();
 	};
 
 	plugin.onThemeChanged = function(theme)

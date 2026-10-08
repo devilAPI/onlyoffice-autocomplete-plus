@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.0
+
+* Add "Pause autocomplete" and "Resume autocomplete" to the right-click menu, to switch the suggestions off for a moment. The settings window has a button for it too.
+
 ## 1.8.0
 
 * Rank the words by how often they occur in Wikipedia as well as in film subtitles, so that the words of formal and technical writing come earlier (`Entwicklung`, `Funktion`, `implementation`).

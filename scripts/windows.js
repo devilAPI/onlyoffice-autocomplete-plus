@@ -124,7 +124,7 @@
 		}
 	}
 
-	const settingsDialog = new Dialog("settings.html", [320, 418]);
+	const settingsDialog = new Dialog("settings.html", [320, 446]);
 	const listDialog = new Dialog("wordlist.html", [320, 380]);
 	let listName = ""; // the list that is being edited
 
@@ -176,7 +176,13 @@
 		settingsDialog.open("Autocomplete settings", {
 			onInit : function() {
 				settingsDialog.send("onSettings", store.settings);
+				settingsDialog.send("onPaused", typing.isPaused());
 				sendCounts();
+			},
+			// pausing takes effect at once, like the changes of the word lists
+			onTogglePause : function() {
+				typing.setPaused(!typing.isPaused());
+				settingsDialog.send("onPaused", typing.isPaused());
 			},
 			onEditList : openList,
 			onResetLearned : function() {

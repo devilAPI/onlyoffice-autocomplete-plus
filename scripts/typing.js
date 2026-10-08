@@ -52,6 +52,7 @@
 	const LIST_ROWS = 5;
 
 	let readsDocument = false; // the document can be asked
+	let isPaused = false;      // switched off by the user until it is resumed or the editor is restarted
 	let currentWord = "";      // the word in front of the cursor
 	let accepted = "";         // the suggestion that was just written
 	let backspaceTime = 0;
@@ -328,7 +329,8 @@
 
 	plugin.event_onInputHelperInput = function(data)
 	{
-		getTracker().onInput(data);
+		if (!isPaused)
+			getTracker().onInput(data);
 	};
 
 	// The editor clears its input for many reasons: backspace, Delete, a typed
@@ -336,15 +338,27 @@
 	// focus. It does not say which one it was.
 	plugin.event_onInputHelperClear = function()
 	{
+		if (isPaused)
+			return;
+
 		const now = Date.now();
 		getTracker().onClear((now - backspaceTime) < 500, (now - deleteTime) < 500);
 	};
 
 	plugin.inputHelper_onSelectItem = function(item)
 	{
-		if (item && plugin.ih.isVisible)
+		if (item && plugin.ih.isVisible && !isPaused)
 			getTracker().onSelect(item);
 	};
+
+	// While it is paused the plugin does not follow what is typed, so it
+	// starts with a new word when it is resumed.
+	function setPaused(paused)
+	{
+		isPaused = paused;
+		documentWord.readId++; // an answer of the document that is still to come is outdated
+		reset();
+	}
 
 	// to be called once the window of the suggestion list is created
 	function start()
@@ -383,7 +397,9 @@
 
 	window.Autocomplete.typing = {
 		start : start,
-		reset : reset
+		reset : reset,
+		isPaused : () => isPaused,
+		setPaused : setPaused
 	};
 
 })(window, undefined);

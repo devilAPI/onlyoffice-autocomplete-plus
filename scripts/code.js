@@ -64,12 +64,15 @@
 		}]);
 	}
 
-	// and so does an item in the context menu
+	// and so does an item in the context menu, where another one pauses the suggestions
 	plugin.event_onContextMenuShow = function(options)
 	{
 		plugin.executeMethod("AddContextMenuItem", [{
 			guid : plugin.guid,
 			items : [{
+				id : "autocompletePauseMenu",
+				text : plugin.tr(typing.isPaused() ? "Resume autocomplete" : "Pause autocomplete")
+			}, {
 				id : "autocompleteSettingsMenu",
 				text : plugin.tr("Autocomplete settings")
 			}]
@@ -87,6 +90,9 @@
 
 		plugin.attachToolbarMenuClickEvent("autocompleteSettings", windows.openSettings);
 		plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", windows.openSettings);
+		plugin.attachContextMenuClickEvent("autocompletePauseMenu", function() {
+			typing.setPaused(!typing.isPaused());
+		});
 		registerMenus();
 
 		typing.start();
