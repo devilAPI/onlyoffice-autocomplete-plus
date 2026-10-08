@@ -45,6 +45,13 @@
 	var g_settingsWindow = null;
 	var g_settingsDraft = null;
 
+	// the user's own words, suggested before the word list and written as entered
+	var g_personalKey = "onlyoffice_autocomplete_personal";
+	var g_personal = [];
+	var g_personalMax = 5000;
+	var g_personalWindow = null;
+	var g_personalDraft = null;
+
 	function checkSettings(settings)
 	{
 		var result = {};
@@ -81,6 +88,45 @@
 		}
 	}
 
+	function parsePersonal(text)
+	{
+		var words = String(text || "").split(/[\s,;]+/);
+		var result = [];
+		var used = {};
+		for (var i = 0; i < words.length && result.length < g_personalMax; i++)
+		{
+			var key = words[i].toLowerCase();
+			if (!key || used[key])
+				continue;
+			used[key] = true;
+			result.push(words[i]);
+		}
+		return result;
+	}
+
+	function loadPersonal()
+	{
+		try
+		{
+			g_personal = parsePersonal(window.localStorage.getItem(g_personalKey));
+		}
+		catch (err)
+		{
+		}
+	}
+
+	function savePersonal(text)
+	{
+		g_personal = parsePersonal(text);
+		try
+		{
+			window.localStorage.setItem(g_personalKey, g_personal.join("\n"));
+		}
+		catch (err)
+		{
+		}
+	}
+
 	// the file lists one word per line, most frequent first;
 	// "\td" or "\te" after the word marks it as only German or only English
 	function loadDictionary(url) {
@@ -111,6 +157,7 @@
 	}
 
 	loadSettings();
+	loadPersonal();
 	loadDictionary("./dictionaries/words.txt");
 
 	function closeSettings()
@@ -138,19 +185,63 @@
 				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
 			],
 			EditorsSupport : ["word", "slide", "cell", "pdf"],
-			size : [320, 260]
+			size : [320, 300]
 		};
 
 		g_settingsDraft = null;
 		g_settingsWindow = new window.Asc.PluginWindow();
 		g_settingsWindow.attachEvent("onInit", function() {
 			if (g_settingsWindow)
+			{
 				g_settingsWindow.command("onSettings", g_settings);
+				g_settingsWindow.command("onPersonalCount", g_personal.length);
+			}
 		});
+		g_settingsWindow.attachEvent("onEditPersonal", openPersonal);
 		g_settingsWindow.attachEvent("onChange", function(settings) {
 			g_settingsDraft = settings;
 		});
 		g_settingsWindow.show(variation);
+	}
+
+	function closePersonal()
+	{
+		if (g_personalWindow)
+		{
+			g_personalWindow.close();
+			g_personalWindow = null;
+		}
+		g_personalDraft = null;
+	}
+
+	function openPersonal()
+	{
+		if (g_personalWindow)
+			return;
+
+		var variation = {
+			url : "personal.html",
+			description : window.Asc.plugin.tr("Personal dictionary"),
+			isVisual : true,
+			isModal : true,
+			buttons : [
+				{ text : window.Asc.plugin.tr("OK"), primary : true },
+				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
+			],
+			EditorsSupport : ["word", "slide", "cell", "pdf"],
+			size : [320, 340]
+		};
+
+		g_personalDraft = null;
+		g_personalWindow = new window.Asc.PluginWindow();
+		g_personalWindow.attachEvent("onInit", function() {
+			if (g_personalWindow)
+				g_personalWindow.command("onPersonal", g_personal.join("\n"));
+		});
+		g_personalWindow.attachEvent("onChange", function(text) {
+			g_personalDraft = text;
+		});
+		g_personalWindow.show(variation);
 	}
 
 	// a button on the Plugins tab and an item in the context menu open the settings
@@ -219,7 +310,17 @@
 	{
 		if (windowId)
 		{
-			if (g_settingsWindow && g_settingsWindow.id === windowId)
+			if (g_personalWindow && g_personalWindow.id === windowId)
+			{
+				if (id === 0 && g_personalDraft !== null)
+				{
+					savePersonal(g_personalDraft);
+					if (g_settingsWindow)
+						g_settingsWindow.command("onPersonalCount", g_personal.length);
+				}
+				closePersonal();
+			}
+			else if (g_settingsWindow && g_settingsWindow.id === windowId)
 			{
 				if (id === 0 && g_settingsDraft)
 				{
@@ -227,6 +328,7 @@
 					window.Asc.plugin.currentText = "";
 					window.Asc.plugin.getInputHelper().unShow();
 				}
+				closePersonal();
 				closeSettings();
 			}
 			return;
@@ -343,12 +445,30 @@
 				end = middle;
 		}
 
+		// personal words come first, in the order they were entered
+		var ret = [];
+		var personal = {};
+		for (var p = 0; p < g_personal.length && ret.length < g_settings.maxItems; p++)
+		{
+			var key = g_personal[p].toLowerCase();
+			if (key.indexOf(textFound) != 0 || key == textFound)
+				continue;
+			personal[key] = true;
+			// written as entered, unless it is all lower case or the typed letters cannot be replaced
+			if (g_personal[p] != key && !isPdfEditor())
+				ret.push(g_personal[p]);
+			else
+				ret.push(text + g_personal[p].substr(textFound.length));
+		}
+
 		var found = [];
 		for (var index = start; index < g_dictionary.length; index++)
 		{
 			if (g_dictionary[index].indexOf(textFound) != 0)
 				break;
 
+			if (personal[g_dictionary[index]])
+				continue;
 			var record = g_words[g_dictionary[index]];
 			if ((record.lang == "d" && !g_settings.german) || (record.lang == "e" && !g_settings.english))
 				continue;
@@ -359,7 +479,6 @@
 
 		found.sort(function(a, b) { return a.rank - b.rank; });
 
-		var ret = [];
 		for (var i = 0; i < found.length && ret.length < g_settings.maxItems; i++)
 		{
 			var word = found[i].text;

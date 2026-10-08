@@ -31,56 +31,16 @@
  */
 (function(window, undefined){
 
-	var g_checks = ["german", "english", "capitalize"];
-	var g_numbers = ["minLength", "maxItems"];
-	var g_personalCount = 0;
-
-	function readSettings()
-	{
-		var settings = {};
-		g_checks.forEach(function(id) {
-			settings[id] = document.getElementById(id).checked;
-		});
-		g_numbers.forEach(function(id) {
-			settings[id] = parseInt(document.getElementById(id).value);
-		});
-		return settings;
-	}
-
-	function showPersonalCount()
-	{
-		var text = window.Asc.plugin.tr(g_personalCount == 1 ? "1 word" : "{count} words");
-		document.getElementById("personalCount").innerText = text.replace("{count}", g_personalCount);
-	}
-
-	function onChange()
-	{
-		window.Asc.plugin.sendToPlugin("onChange", readSettings());
-	}
-
 	window.Asc.plugin.init = function()
 	{
-		window.Asc.plugin.attachEvent("onSettings", function(settings) {
-			g_checks.forEach(function(id) {
-				document.getElementById(id).checked = settings[id];
-			});
-			g_numbers.forEach(function(id) {
-				document.getElementById(id).value = settings[id];
-			});
-			onChange();
-		});
+		var words = document.getElementById("words");
 
-		window.Asc.plugin.attachEvent("onPersonalCount", function(count) {
-			g_personalCount = count;
-			showPersonalCount();
+		window.Asc.plugin.attachEvent("onPersonal", function(text) {
+			words.value = text;
+			words.focus();
 		});
-		document.getElementById("editPersonal").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onEditPersonal");
-		});
-
-		g_checks.concat(g_numbers).forEach(function(id) {
-			document.getElementById(id).addEventListener("change", onChange);
-			document.getElementById(id).addEventListener("input", onChange);
+		words.addEventListener("input", function() {
+			window.Asc.plugin.sendToPlugin("onChange", words.value);
 		});
 
 		window.Asc.plugin.sendToPlugin("onInit");
@@ -91,7 +51,6 @@
 		var elements = document.querySelectorAll(".i18n");
 		for (var i = 0; i < elements.length; i++)
 			elements[i].innerText = window.Asc.plugin.tr(elements[i].innerText);
-		showPersonalCount();
 	};
 
 	window.Asc.plugin.onThemeChanged = function(theme)

@@ -9,5 +9,10 @@
 	"Suggestions": "Vorschläge",
 	"Capitalise German nouns": "Deutsche Substantive großschreiben",
 	"Letters before suggesting": "Buchstaben bis zum Vorschlag",
-	"Maximum number of suggestions": "Maximale Anzahl der Vorschläge"
+	"Maximum number of suggestions": "Maximale Anzahl der Vorschläge",
+	"Personal dictionary": "Persönliches Wörterbuch",
+	"Edit": "Bearbeiten",
+	"1 word": "1 Wort",
+	"{count} words": "{count} Wörter",
+	"Your own words, one per line. They are suggested first and written exactly as entered.": "Eigene Wörter, eines pro Zeile. Sie werden zuerst vorgeschlagen und genau so geschrieben, wie sie eingegeben wurden."
 }

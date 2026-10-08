@@ -33,7 +33,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Autocomplete settings</title>
+	<title>Personal dictionary</title>
 	<script type="text/javascript" src="./../v1/plugins.js"></script>
 	<script type="text/javascript" src="./../v1/plugins-ui.js"></script>
 	<link rel="stylesheet" href="./../v1/plugins.css">
@@ -44,69 +44,29 @@
 			margin: 0;
 			padding: 0;
 		}
-		#settings {
+		#personal {
+			box-sizing: border-box;
+			height: 100%;
 			padding: 16px;
-		}
-		.row {
 			display: flex;
-			align-items: center;
-			min-height: 28px;
+			flex-direction: column;
 		}
-		.row label {
+		#description {
+			margin-bottom: 8px;
+		}
+		#words {
 			flex: 1;
-			cursor: pointer;
-		}
-		.row input[type="checkbox"] {
-			margin: 0 8px 0 0;
-		}
-		.row input[type="number"] {
-			width: 60px;
-		}
-		.row button {
-			min-width: 60px;
-		}
-		#personalCount {
-			cursor: default;
-		}
-		.header {
-			font-weight: bold;
-			margin: 10px 0 2px 0;
-		}
-		.header:first-child {
-			margin-top: 0;
+			box-sizing: border-box;
+			width: 100%;
+			resize: none;
 		}
 	</style>
-	<script src="scripts/settings.js"></script>
+	<script src="scripts/personal.js"></script>
 </head>
-<body class="noselect">
-	<div id="settings">
-		<div class="header i18n">Languages</div>
-		<div class="row">
-			<input type="checkbox" id="german">
-			<label for="german" class="i18n">German</label>
-		</div>
-		<div class="row">
-			<input type="checkbox" id="english">
-			<label for="english" class="i18n">English</label>
-		</div>
-		<div class="header i18n">Suggestions</div>
-		<div class="row">
-			<input type="checkbox" id="capitalize">
-			<label for="capitalize" class="i18n">Capitalise German nouns</label>
-		</div>
-		<div class="row">
-			<label for="minLength" class="i18n">Letters before suggesting</label>
-			<input type="number" id="minLength" class="form-control" min="1" max="6" step="1">
-		</div>
-		<div class="row">
-			<label for="maxItems" class="i18n">Maximum number of suggestions</label>
-			<input type="number" id="maxItems" class="form-control" min="1" max="100" step="1">
-		</div>
-		<div class="header i18n">Personal dictionary</div>
-		<div class="row">
-			<label id="personalCount"></label>
-			<button id="editPersonal" class="btn-text-default i18n">Edit</button>
-		</div>
+<body>
+	<div id="personal">
+		<div id="description" class="i18n">Your own words, one per line. They are suggested first and written exactly as entered.</div>
+		<textarea id="words" class="form-control" spellcheck="false"></textarea>
 	</div>
 </body>
 </html>

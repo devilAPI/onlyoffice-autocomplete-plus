@@ -11,6 +11,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | Languages | English | German and English |
 | Word list | 370,000 words, unranked | 258,000 words, most common first |
 | German nouns | - | Capitalised (`hau` → `Haus`) |
+| Personal dictionary | - | Yes |
 | Settings window | - | Yes |
 | PDF editor | - | Yes |
 | Interface languages | English | English and German |
@@ -47,7 +48,11 @@ Click the **Autocomplete** button on the Plugins tab, or right-click in the docu
 | Letters before suggesting | Letters you type before the suggestions appear, 1 to 6 | 3 |
 | Maximum number of suggestions | 1 to 100 | 30 |
 
-The settings are stored in the editor on your device.
+### Personal dictionary
+
+In the settings window, click **Edit** under *Personal dictionary* and enter your own words, one per line: names, technical terms, abbreviations. They are suggested before all other words and written exactly as you entered them, so `onl` offers `OnlyOffice`.
+
+The settings and the personal dictionary are stored in the editor on your device.
 
 ## Development
 
@@ -55,6 +60,7 @@ The settings are stored in the editor on your device.
 |---|---|
 | `scripts/code.js` | The background plugin: word lookup, settings, toolbar button and context menu item |
 | `settings.html`, `scripts/settings.js` | The settings window |
+| `personal.html`, `scripts/personal.js` | The personal dictionary editor |
 | `dictionaries/words.txt` | The word list |
 | `translations/` | Interface translations |
 | `tools/build_words.py` | Builds the word list |

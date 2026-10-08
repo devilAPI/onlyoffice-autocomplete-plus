@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.0
+
+* Add a personal dictionary: your own words are suggested first and written exactly as entered.
+
 ## 1.3.1
 
 * Fix the selected suggestion not being written in the PDF editor.
