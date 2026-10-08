@@ -6,21 +6,16 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 
 ## Fork features
 
-| | Original plugin | This fork |
+| Feature | Original plugin | This fork |
 |---|---|---|
-| Languages | English | German and English, each can be switched off |
-| Order of suggestions | Alphabetical | Most common words first |
-| German nouns | - | Suggested with a capital letter (`hau` → `Haus`) |
-| Settings | None | Settings window in the editor |
-| PDF editor | Not offered | Supported |
-| Interface language | English | English and German |
+| Languages | English | German and English |
+| Word list | 370,000 words, unranked | 258,000 words, most common first |
+| German nouns | - | Capitalised (`hau` → `Haus`) |
+| Settings window | - | Yes |
+| PDF editor | - | Yes |
+| Interface languages | English | English and German |
 
-* **German and English word list.** About 258,000 words (189,000 German, 78,000 English) in one list, including inflected forms.
-* **Ranked by frequency.** Suggestions are ordered by how often a word is used, so `gesch` offers `Geschichte` and `geschafft` before rare words.
-* **German capitalisation.** Nouns and names are suggested with their capital letter. Other words follow what you typed.
-* **Settings in the editor.** Choose the languages, the number of letters before suggestions appear, the number of suggestions, and whether German nouns are capitalised.
-* **PDF editor support.** The plugin is also offered when you edit a PDF. The PDF editor does not let a plugin replace typed text, so there the suggestion completes the word as you typed it and German nouns are not capitalised for you.
-* **Fixes.** The original lookup skipped every second matching word and sorted the whole dictionary again on every keystroke.
+It also fixes two bugs in the original: every second matching word was skipped, and the whole dictionary was sorted again on every keystroke.
 
 ## Installation
 
@@ -37,6 +32,8 @@ The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/Deskto
 2. Click the word you want, or keep typing to narrow the list.
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
+
+In the PDF editor a plugin cannot replace text you have typed, so there the suggestion completes the word in the case you typed it: German nouns are not capitalised for you.
 
 ## Settings
 
