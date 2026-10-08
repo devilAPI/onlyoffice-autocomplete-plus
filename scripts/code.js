@@ -31,27 +31,38 @@
  */
 (function(window, undefined){
 
-	var g_dictionary = null;
+	var g_dictionary = null; // lower-case words, sorted for the prefix search
+	var g_words = {};        // lower-case word -> { rank, text }, rank 0 is the most frequent
+	var g_maxItems = 30;
 
+	// the file lists one word per line, most frequent first
 	function loadDictionary(url) {
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
+				var dictionary = [];
 				if (xhr.status === 200 || xhr.status === 0) {
-					g_dictionary = xhr.responseText.split(/\r?\n/);
-				} else {	
-					g_dictionary = [];
+					var lines = xhr.responseText.split(/\r?\n/);
+					for (var i = 0; i < lines.length; i++) {
+						var key = lines[i].toLowerCase();
+						if (!key || g_words[key])
+							continue;
+						g_words[key] = { rank : i, text : lines[i] };
+						dictionary.push(key);
+					}
+					dictionary.sort();
 				}
+				g_dictionary = dictionary;
 			}
 		};
-		xhr.onerror = function() {			
+		xhr.onerror = function() {
 			g_dictionary = [];
 		};
 		xhr.send();
 	}
 
-	loadDictionary("./dictionaries/en.txt");
+	loadDictionary("./dictionaries/words.txt");
 
 	window.isInit = false;
 
@@ -150,63 +161,43 @@
 	window.getAutoComplete = function(text)
 	{
 		if (!g_dictionary)
-			return;
+			return [];
 
 		window.isAutoCompleteReady = true;
-		g_dictionary.sort();
 
 		var textFound = text.toLowerCase();
 
+		// first word >= textFound
 		var start = 0;
-		var end = g_dictionary.length - 1;
-		var index = 0;
-
-		while (true)
+		var end = g_dictionary.length;
+		while (start < end)
 		{
-			var middle = (end + start) >> 1;
-
-			if (middle == start || middle == end)
-			{
-				index = start;
-
-				while (index != end)
-				{
-					if (g_dictionary[index] >= textFound)
-						break;
-					index++;
-				}
-
-				break;
-			}
-
-			var test = g_dictionary[middle];
-
-			if (test == textFound)
-			{
-				index = middle;
-				break;
-			}
-
-			if (test < textFound)
-			{
-				start = middle;				
-			}
+			var middle = (start + end) >> 1;
+			if (g_dictionary[middle] < textFound)
+				start = middle + 1;
 			else
-			{
 				end = middle;
-			}
 		}
 
-		var ret = [];
-		end = g_dictionary.length;
-		while (index < end)
+		var found = [];
+		for (var index = start; index < g_dictionary.length; index++)
 		{
-			var testRec = g_dictionary[index++];
-			if (testRec.indexOf(textFound) != 0)
+			if (g_dictionary[index].indexOf(textFound) != 0)
 				break;
+			found.push(g_words[g_dictionary[index]]);
+		}
 
-			ret.push(text + testRec.substr(textFound.length));
-			index++;
+		found.sort(function(a, b) { return a.rank - b.rank; });
+
+		var ret = [];
+		for (var i = 0; i < found.length && ret.length < g_maxItems; i++)
+		{
+			var word = found[i].text;
+			// nouns and names keep their capital letter, everything else follows the typed text
+			if (word.charAt(0) != word.charAt(0).toLowerCase())
+				ret.push(word);
+			else
+				ret.push(text + word.substr(textFound.length));
 		}
 
 		return ret;
