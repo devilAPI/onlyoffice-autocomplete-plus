@@ -19,7 +19,7 @@ It also fixes two bugs in the original: every second matching word was skipped, 
 
 ## Installation
 
-1. Download `autocomplete.plugin` from the [latest release](https://github.com/devilAPI/onlyoffice-autocomplete-de-en/releases/latest).
+1. Download `autocomplete.plugin` from the [latest release](https://github.com/devilAPI/onlyoffice-autocomplete-plus/releases/latest).
 2. If the original Autocomplete plugin is installed, remove it first in *Plugins → Plugin Manager*.
 3. In the editor, open *Plugins → Plugin Manager → Available plugins → Install plugin manually* and select the downloaded file.
 4. Restart the editor.
