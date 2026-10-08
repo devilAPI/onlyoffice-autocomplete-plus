@@ -14,7 +14,7 @@
 	},
 	"offered": "Ascensio System SIA",
 	"guid" : "asc.{A103601F-FDA0-418A-BC37-A514031894C0}",
-	"version" : "1.2.0",
+	"version" : "1.3.0",
 
 	"variations" : [
 		{
@@ -42,6 +42,9 @@
 			"events" : [
 				"onInputHelperClear",
 				"onInputHelperInput",
+				"onToolbarMenuClick",
+				"onContextMenuShow",
+				"onContextMenuClick",
 				"onKeyDown"
 			],
 			"store": {

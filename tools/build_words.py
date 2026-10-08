@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Builds dictionaries/words.txt: German and English words, most frequent first.
 
+Each line is a word, followed by a tab and "d" or "e" if the word is only
+German or only English.
+
 A word is kept if it is in a spelling list (which filters typos out of the
 frequency data) and frequent enough. German nouns and names keep their capital
 letter unless the word is more common in English.
@@ -17,6 +20,8 @@ SPELLING = {
 FREQUENCY = "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/%s/%s_full.txt"
 # minimal number of occurrences in the frequency corpus
 MIN_COUNT = {"de": 3, "en": 10}
+# a word found in both languages counts as foreign in the one where it is this much rarer
+FOREIGN_RATIO = 20
 # the plugin starts suggesting after three typed letters
 WORD = re.compile(r"^[a-zäöüß]{4,}$")
 
@@ -51,10 +56,18 @@ def main():
             return sorted(forms[word])[0]
         return word
 
+    def language(word):
+        de, en = score["de"].get(word, 0), score["en"].get(word, 0)
+        if de >= en * FOREIGN_RATIO:
+            return "\td"
+        if en >= de * FOREIGN_RATIO:
+            return "\te"
+        return ""
+
     words = set(score["de"]) | set(score["en"])
     order = sorted(words, key=lambda w: (-max(score["de"].get(w, 0), score["en"].get(w, 0)), w))
     with open("dictionaries/words.txt", "w", encoding="utf-8") as output:
-        output.write("\n".join(display(word) for word in order))
+        output.write("\n".join(display(word) + language(word) for word in order))
     print("%d words (%d German, %d English)" % (len(order), len(score["de"]), len(score["en"])))
 
 

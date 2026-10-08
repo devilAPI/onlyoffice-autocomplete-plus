@@ -9,15 +9,27 @@ An input assistant for ONLYOFFICE editors that suggests German and English words
 * **German and English suggestions** from one combined word list of about 258,000 words (189,000 German, 78,000 English).
 * **Most common words first.** Suggestions are ranked by how often a word is used instead of alphabetically, and the list is limited to the 30 best matches.
 * **German capitalisation.** Nouns and names are suggested with their capital letter (typing `hau` offers `Haus`); other words follow what you typed.
+* **Settings in the editor.** Switch German or English off, change how many letters you type before suggestions appear and how many are shown, and turn the German capitalisation off.
 * **PDF editor support.** The plugin is also offered in the PDF editor.
 * **Fixes.** The original lookup skipped every second matching word and sorted the whole dictionary again on every keystroke.
 
 ## How to use
 
-1. Start typing and the plugin will suggest variants for you once you have typed three letters.
+1. Start typing and the plugin will suggest variants for you once you have typed three letters (this can be changed in the settings).
 2. Click on the variant you want to be inserted into your doc.
 
-The plugin runs in the background, so it has no button of its own. You can switch it on and off in the list of background plugins on the Plugins tab.
+The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
+
+## Settings
+
+Click the **Autocomplete** button on the Plugins tab, or right-click in the document and choose **Autocomplete settings**:
+
+* **German / English** - the languages to suggest words from.
+* **Capitalise German nouns** - suggest `Haus` when you type `hau`.
+* **Letters before suggesting** - how many letters you type before the suggestions appear (1 to 6, default 3).
+* **Maximum number of suggestions** - 1 to 100, default 30.
+
+The settings are stored in the editor on your device.
 
 ## How to install
 
@@ -27,7 +39,7 @@ The plugin is compatible with [self-hosted](https://github.com/ONLYOFFICE/Docume
 
 ## Rebuilding the word list
 
-`dictionaries/words.txt` lists one word per line, most frequent first. It is built from the sources below with:
+`dictionaries/words.txt` lists one word per line, most frequent first, with a marker for words that are only German or only English. It is built from the sources below with:
 
 ```
 python3 tools/build_words.py

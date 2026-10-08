@@ -32,10 +32,57 @@
 (function(window, undefined){
 
 	var g_dictionary = null; // lower-case words, sorted for the prefix search
-	var g_words = {};        // lower-case word -> { rank, text }, rank 0 is the most frequent
-	var g_maxItems = 30;
+	var g_words = {};        // lower-case word -> { rank, text, lang }, rank 0 is the most frequent
 
-	// the file lists one word per line, most frequent first
+	var g_settingsKey = "onlyoffice_autocomplete_settings";
+	var g_settings = {
+		german : true,
+		english : true,
+		capitalize : true, // suggest German nouns with a capital letter
+		minLength : 3,     // typed letters before the suggestions appear
+		maxItems : 30
+	};
+	var g_settingsWindow = null;
+	var g_settingsDraft = null;
+
+	function checkSettings(settings)
+	{
+		var result = {};
+		for (var name in g_settings)
+		{
+			var value = (settings && typeof settings[name] === typeof g_settings[name]) ? settings[name] : g_settings[name];
+			result[name] = value;
+		}
+		result.minLength = Math.min(6, Math.max(1, Math.round(result.minLength) || 3));
+		result.maxItems = Math.min(100, Math.max(1, Math.round(result.maxItems) || 30));
+		return result;
+	}
+
+	function loadSettings()
+	{
+		try
+		{
+			g_settings = checkSettings(JSON.parse(window.localStorage.getItem(g_settingsKey)));
+		}
+		catch (err)
+		{
+		}
+	}
+
+	function saveSettings(settings)
+	{
+		g_settings = checkSettings(settings);
+		try
+		{
+			window.localStorage.setItem(g_settingsKey, JSON.stringify(g_settings));
+		}
+		catch (err)
+		{
+		}
+	}
+
+	// the file lists one word per line, most frequent first;
+	// "\td" or "\te" after the word marks it as only German or only English
 	function loadDictionary(url) {
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
@@ -45,10 +92,11 @@
 				if (xhr.status === 200 || xhr.status === 0) {
 					var lines = xhr.responseText.split(/\r?\n/);
 					for (var i = 0; i < lines.length; i++) {
-						var key = lines[i].toLowerCase();
+						var parts = lines[i].split("\t");
+						var key = parts[0].toLowerCase();
 						if (!key || g_words[key])
 							continue;
-						g_words[key] = { rank : i, text : lines[i] };
+						g_words[key] = { rank : i, text : parts[0], lang : parts[1] || "" };
 						dictionary.push(key);
 					}
 					dictionary.sort();
@@ -62,7 +110,80 @@
 		xhr.send();
 	}
 
+	loadSettings();
 	loadDictionary("./dictionaries/words.txt");
+
+	function closeSettings()
+	{
+		if (g_settingsWindow)
+		{
+			g_settingsWindow.close();
+			g_settingsWindow = null;
+		}
+		g_settingsDraft = null;
+	}
+
+	function openSettings()
+	{
+		if (g_settingsWindow)
+			return;
+
+		var variation = {
+			url : "settings.html",
+			description : window.Asc.plugin.tr("Autocomplete settings"),
+			isVisual : true,
+			isModal : true,
+			buttons : [
+				{ text : window.Asc.plugin.tr("OK"), primary : true },
+				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
+			],
+			EditorsSupport : ["word", "slide", "cell", "pdf"],
+			size : [320, 260]
+		};
+
+		g_settingsDraft = null;
+		g_settingsWindow = new window.Asc.PluginWindow();
+		g_settingsWindow.attachEvent("onInit", function() {
+			if (g_settingsWindow)
+				g_settingsWindow.command("onSettings", g_settings);
+		});
+		g_settingsWindow.attachEvent("onChange", function(settings) {
+			g_settingsDraft = settings;
+		});
+		g_settingsWindow.show(variation);
+	}
+
+	// a button on the Plugins tab and an item in the context menu open the settings
+	function registerMenus()
+	{
+		window.Asc.plugin.executeMethod("AddToolbarMenuItem", [{
+			guid : window.Asc.plugin.guid,
+			tabs : [{
+				id : "plugins",
+				items : [{
+					id : "autocompleteSettings",
+					type : "button",
+					text : window.Asc.plugin.tr("Autocomplete"),
+					hint : window.Asc.plugin.tr("Autocomplete settings"),
+					icons : "resources/img/icon%scale%(default).png",
+					lockInViewMode : false,
+					enableToggle : false,
+					separator : true
+				}]
+			}]
+		}]);
+	}
+
+	window.Asc.plugin.event_onContextMenuShow = function(options)
+	{
+		window.Asc.plugin.executeMethod("AddContextMenuItem", [{
+			guid : window.Asc.plugin.guid,
+			items : [{
+				id : "autocompleteSettingsMenu",
+				text : window.Asc.plugin.tr("Autocomplete settings")
+			}]
+		}]);
+	};
 
 	window.isInit = false;
 
@@ -75,11 +196,37 @@
 			window.Asc.plugin.currentText = "";
 			window.Asc.plugin.createInputHelper();
 			window.Asc.plugin.getInputHelper().createWindow();
+
+			window.Asc.plugin.attachToolbarMenuClickEvent("autocompleteSettings", openSettings);
+			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
+			registerMenus();
 		}
 	};
 
-	window.Asc.plugin.button = function(id)
+	window.Asc.plugin.onTranslate = function()
 	{
+		// update the button caption once the translations are loaded
+		if (window.isInit)
+			registerMenus();
+	};
+
+	window.Asc.plugin.button = function(id, windowId)
+	{
+		if (windowId)
+		{
+			if (g_settingsWindow && g_settingsWindow.id === windowId)
+			{
+				if (id === 0 && g_settingsDraft)
+				{
+					saveSettings(g_settingsDraft);
+					window.Asc.plugin.currentText = "";
+					window.Asc.plugin.getInputHelper().unShow();
+				}
+				closeSettings();
+			}
+			return;
+		}
+
 		this.executeCommand("close", "");
 	};
 	
@@ -115,7 +262,7 @@
 				window.Asc.plugin.currentText = window.Asc.plugin.currentText.substr(lastIndexSpace + 1);
 		}
 
-		if (window.Asc.plugin.currentText.length < 3)
+		if (window.Asc.plugin.currentText.length < g_settings.minLength)
 		{
 			window.Asc.plugin.getInputHelper().unShow();
 			return;
@@ -184,17 +331,23 @@
 		{
 			if (g_dictionary[index].indexOf(textFound) != 0)
 				break;
-			found.push(g_words[g_dictionary[index]]);
+
+			var record = g_words[g_dictionary[index]];
+			if ((record.lang == "d" && !g_settings.german) || (record.lang == "e" && !g_settings.english))
+				continue;
+			if (record.lang == "" && !g_settings.german && !g_settings.english)
+				continue;
+			found.push(record);
 		}
 
 		found.sort(function(a, b) { return a.rank - b.rank; });
 
 		var ret = [];
-		for (var i = 0; i < found.length && ret.length < g_maxItems; i++)
+		for (var i = 0; i < found.length && ret.length < g_settings.maxItems; i++)
 		{
 			var word = found[i].text;
 			// nouns and names keep their capital letter, everything else follows the typed text
-			if (word.charAt(0) != word.charAt(0).toLowerCase())
+			if (g_settings.capitalize && g_settings.german && word.charAt(0) != word.charAt(0).toLowerCase())
 				ret.push(word);
 			else
 				ret.push(text + word.substr(textFound.length));

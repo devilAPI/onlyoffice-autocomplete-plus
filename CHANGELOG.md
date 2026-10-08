@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.0
+
+* Add a settings window (languages, capitalisation, letters before suggesting, number of suggestions), opened from the Plugins tab or the context menu.
+* Add German translation of the plugin interface.
+
 ## 1.2.0
 
 * Add German words; German nouns are suggested with a capital letter.
