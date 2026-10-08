@@ -507,6 +507,17 @@
 			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
 			registerMenus();
 
+			// While the suggestions are shown the editor does not report backspace,
+			// so watch the keys of the editor window where the plugin can reach it
+			// (the desktop editors).
+			try
+			{
+				window.parent.document.addEventListener("keydown", onEditorKeyDown, true);
+			}
+			catch (err)
+			{
+			}
+
 			// the suggestion list has just set its key handler: watch the keys before it
 			var onListKeyDown = window.Asc.plugin.event_onKeyDown;
 			window.Asc.plugin.event_onKeyDown = function(e)
