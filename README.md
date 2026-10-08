@@ -53,6 +53,7 @@ Click the **Autocomplete** button on the Plugins tab, or right-click in the docu
 | English | Suggest English words | On |
 | Capitalise German nouns | Suggest `Haus` when you type `hau` | On |
 | Show the words I choose first | Words you picked before move to the top of the list | On |
+| Add a space after the chosen word | Write a space after the suggestion you choose, so you can go on with the next word | Off |
 | Letters before suggesting | Letters you type before the suggestions appear, 1 to 6 | 3 |
 | Maximum number of suggestions | 1 to 100 | 30 |
 
@@ -74,7 +75,12 @@ The settings, both word lists and the learned words are stored in the editor on 
 
 | Path | Content |
 |---|---|
-| `scripts/code.js` | The background plugin: word lookup, settings, toolbar button and context menu item |
+| `index.html`, `scripts/code.js` | The background plugin: starts the parts below, toolbar button and context menu item |
+| `scripts/store.js` | The settings, the personal dictionary, the ignored words and the learned words |
+| `scripts/dictionary.js` | Loads the word list and finds the suggestions for the typed letters |
+| `scripts/editor.js` | What the plugin can do in the editor it runs in, and writing into the PDF editor |
+| `scripts/typing.js` | Follows the word in front of the cursor, shows the suggestions and writes the chosen one |
+| `scripts/windows.js` | Opens the settings window and the word list editor and saves what they return |
 | `settings.html`, `scripts/settings.js` | The settings window |
 | `wordlist.html`, `scripts/wordlist.js` | The editor for the personal dictionary, the ignored words and the learned words |
 | `dictionaries/words.txt` | The word list |

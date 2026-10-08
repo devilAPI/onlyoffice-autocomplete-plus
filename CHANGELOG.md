@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.0
+
+* Add a setting to write a space after the chosen suggestion. It is switched off by default.
+* Fix a personal word like "constructor", which is also the name of something built into the browser, never being suggested.
+* Split the code of the background plugin into several scripts.
+
 ## 1.6.1
 
 * Fix the suggestions starting again after backspace: deleting letters continues the word in front of the cursor, also after a space or after a suggestion was chosen. In text documents the plugin now reads that word from the document instead of remembering what was typed.

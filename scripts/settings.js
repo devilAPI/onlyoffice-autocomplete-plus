@@ -31,80 +31,79 @@
  */
 (function(window, undefined){
 
-	var g_checks = ["german", "english", "capitalize", "learn"];
-	var g_numbers = ["minLength", "maxItems"];
-	var g_listCounts = { personal : 0, ignored : 0, learned : 0 };
+	const plugin = window.Asc.plugin;
+
+	function getInputs()
+	{
+		return Array.from(document.querySelectorAll("#settings input"));
+	}
+
+	function isCheck(input)
+	{
+		return input.type == "checkbox";
+	}
 
 	function readSettings()
 	{
-		var settings = {};
-		g_checks.forEach(function(id) {
-			settings[id] = document.getElementById(id).checked;
-		});
-		g_numbers.forEach(function(id) {
-			settings[id] = parseInt(document.getElementById(id).value);
+		const settings = {};
+		getInputs().forEach(function(input) {
+			settings[input.id] = isCheck(input) ? input.checked : parseInt(input.value);
 		});
 		return settings;
 	}
 
-	function showListCounts()
+	function showSettings(settings)
 	{
-		for (var name in g_listCounts)
-			document.getElementById(name + "Count").innerText = g_listCounts[name];
+		getInputs().forEach(function(input) {
+			if (isCheck(input))
+				input.checked = settings[input.id];
+			else
+				input.value = settings[input.id];
+		});
 	}
 
 	function onChange()
 	{
-		window.Asc.plugin.sendToPlugin("onChange", readSettings());
+		plugin.sendToPlugin("onChange", readSettings());
 	}
 
-	window.Asc.plugin.init = function()
+	plugin.init = function()
 	{
-		window.Asc.plugin.attachEvent("onSettings", function(settings) {
-			g_checks.forEach(function(id) {
-				document.getElementById(id).checked = settings[id];
-			});
-			g_numbers.forEach(function(id) {
-				document.getElementById(id).value = settings[id];
-			});
+		plugin.attachEvent("onSettings", function(settings) {
+			showSettings(settings);
 			onChange();
 		});
+		plugin.attachEvent("onListCounts", function(counts) {
+			for (const name in counts)
+				document.getElementById(name + "Count").innerText = counts[name];
+		});
 
-		window.Asc.plugin.attachEvent("onListCounts", function(counts) {
-			g_listCounts = counts;
-			showListCounts();
+		getInputs().forEach(function(input) {
+			input.addEventListener("change", onChange);
+			input.addEventListener("input", onChange);
 		});
-		document.getElementById("editPersonal").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onEditList", "personal");
-		});
-		document.getElementById("editIgnored").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onEditList", "ignored");
-		});
-		document.getElementById("editLearned").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onEditList", "learned");
+		Array.from(document.querySelectorAll("[data-edit]")).forEach(function(button) {
+			button.addEventListener("click", function() {
+				plugin.sendToPlugin("onEditList", button.dataset.edit);
+			});
 		});
 		document.getElementById("resetLearned").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onResetLearned");
+			plugin.sendToPlugin("onResetLearned");
 		});
 
-		g_checks.concat(g_numbers).forEach(function(id) {
-			document.getElementById(id).addEventListener("change", onChange);
-			document.getElementById(id).addEventListener("input", onChange);
+		plugin.sendToPlugin("onInit");
+	};
+
+	plugin.onTranslate = function()
+	{
+		Array.from(document.querySelectorAll(".i18n")).forEach(function(element) {
+			element.innerText = plugin.tr(element.innerText);
 		});
-
-		window.Asc.plugin.sendToPlugin("onInit");
 	};
 
-	window.Asc.plugin.onTranslate = function()
+	plugin.onThemeChanged = function(theme)
 	{
-		var elements = document.querySelectorAll(".i18n");
-		for (var i = 0; i < elements.length; i++)
-			elements[i].innerText = window.Asc.plugin.tr(elements[i].innerText);
-	};
-
-	window.Asc.plugin.onThemeChanged = function(theme)
-	{
-		window.Asc.plugin.onThemeChangedBase(theme);
+		plugin.onThemeChangedBase(theme);
 	};
 
 })(window, undefined);
