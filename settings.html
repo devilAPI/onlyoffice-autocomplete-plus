@@ -65,8 +65,12 @@
 		.row button {
 			min-width: 60px;
 		}
-		#personalCount {
+		.row label:not([for]) {
 			cursor: default;
+		}
+		.count {
+			margin: 0 8px;
+			opacity: 0.6;
 		}
 		.header {
 			font-weight: bold;
@@ -102,10 +106,16 @@
 			<label for="maxItems" class="i18n">Maximum number of suggestions</label>
 			<input type="number" id="maxItems" class="form-control" min="1" max="100" step="1">
 		</div>
-		<div class="header i18n">Personal dictionary</div>
+		<div class="header i18n">Your words</div>
 		<div class="row">
-			<label id="personalCount"></label>
+			<label class="i18n">Personal dictionary</label>
+			<span class="count" id="personalCount"></span>
 			<button id="editPersonal" class="btn-text-default i18n">Edit</button>
+		</div>
+		<div class="row">
+			<label class="i18n">Ignored words</label>
+			<span class="count" id="ignoredCount"></span>
+			<button id="editIgnored" class="btn-text-default i18n">Edit</button>
 		</div>
 	</div>
 </body>

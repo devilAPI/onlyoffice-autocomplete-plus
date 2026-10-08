@@ -33,7 +33,7 @@
 
 	var g_checks = ["german", "english", "capitalize"];
 	var g_numbers = ["minLength", "maxItems"];
-	var g_personalCount = 0;
+	var g_listCounts = { personal : 0, ignored : 0 };
 
 	function readSettings()
 	{
@@ -47,10 +47,10 @@
 		return settings;
 	}
 
-	function showPersonalCount()
+	function showListCounts()
 	{
-		var text = window.Asc.plugin.tr(g_personalCount == 1 ? "1 word" : "{count} words");
-		document.getElementById("personalCount").innerText = text.replace("{count}", g_personalCount);
+		for (var name in g_listCounts)
+			document.getElementById(name + "Count").innerText = g_listCounts[name];
 	}
 
 	function onChange()
@@ -70,12 +70,15 @@
 			onChange();
 		});
 
-		window.Asc.plugin.attachEvent("onPersonalCount", function(count) {
-			g_personalCount = count;
-			showPersonalCount();
+		window.Asc.plugin.attachEvent("onListCounts", function(counts) {
+			g_listCounts = counts;
+			showListCounts();
 		});
 		document.getElementById("editPersonal").addEventListener("click", function() {
-			window.Asc.plugin.sendToPlugin("onEditPersonal");
+			window.Asc.plugin.sendToPlugin("onEditList", "personal");
+		});
+		document.getElementById("editIgnored").addEventListener("click", function() {
+			window.Asc.plugin.sendToPlugin("onEditList", "ignored");
 		});
 
 		g_checks.concat(g_numbers).forEach(function(id) {
@@ -91,7 +94,6 @@
 		var elements = document.querySelectorAll(".i18n");
 		for (var i = 0; i < elements.length; i++)
 			elements[i].innerText = window.Asc.plugin.tr(elements[i].innerText);
-		showPersonalCount();
 	};
 
 	window.Asc.plugin.onThemeChanged = function(theme)

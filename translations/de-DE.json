@@ -12,7 +12,8 @@
 	"Maximum number of suggestions": "Maximale Anzahl der Vorschläge",
 	"Personal dictionary": "Persönliches Wörterbuch",
 	"Edit": "Bearbeiten",
-	"1 word": "1 Wort",
-	"{count} words": "{count} Wörter",
-	"Your own words, one per line. They are suggested first and written exactly as entered.": "Eigene Wörter, eines pro Zeile. Sie werden zuerst vorgeschlagen und genau so geschrieben, wie sie eingegeben wurden."
+	"Your own words, one per line. They are suggested first and written exactly as entered.": "Eigene Wörter, eines pro Zeile. Sie werden zuerst vorgeschlagen und genau so geschrieben, wie sie eingegeben wurden.",
+	"Your words": "Eigene Wörter",
+	"Ignored words": "Ignorierte Wörter",
+	"Words that are never suggested, one per line.": "Wörter, die nie vorgeschlagen werden, eines pro Zeile."
 }

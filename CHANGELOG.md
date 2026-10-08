@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.0
+
+* Add ignored words: words that are never suggested. Right-click a suggestion to ignore it, or edit the list in the settings.
+
 ## 1.4.0
 
 * Add a personal dictionary: your own words are suggested first and written exactly as entered.

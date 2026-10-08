@@ -35,8 +35,9 @@
 	{
 		var words = document.getElementById("words");
 
-		window.Asc.plugin.attachEvent("onPersonal", function(text) {
-			words.value = text;
+		window.Asc.plugin.attachEvent("onList", function(list) {
+			document.getElementById("description").innerText = list.description;
+			words.value = list.text;
 			words.focus();
 		});
 		words.addEventListener("input", function() {
@@ -44,13 +45,6 @@
 		});
 
 		window.Asc.plugin.sendToPlugin("onInit");
-	};
-
-	window.Asc.plugin.onTranslate = function()
-	{
-		var elements = document.querySelectorAll(".i18n");
-		for (var i = 0; i < elements.length; i++)
-			elements[i].innerText = window.Asc.plugin.tr(elements[i].innerText);
 	};
 
 	window.Asc.plugin.onThemeChanged = function(theme)

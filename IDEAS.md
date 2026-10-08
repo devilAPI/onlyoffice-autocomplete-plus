@@ -6,7 +6,6 @@ Possible features, roughly in order of usefulness.
 
 * **Learn from use** - words you accept move up the ranking, so the list adapts to how you write.
 * **Learn from the document** - suggest words that already appear in the open document, which catches technical terms and names the word list does not have.
-* **Ignore list** - right-click a suggestion you never want to hide it for good.
 
 ## Better suggestions
 

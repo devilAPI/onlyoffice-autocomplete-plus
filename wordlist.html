@@ -33,7 +33,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Personal dictionary</title>
+	<title>Word list</title>
 	<script type="text/javascript" src="./../v1/plugins.js"></script>
 	<script type="text/javascript" src="./../v1/plugins-ui.js"></script>
 	<link rel="stylesheet" href="./../v1/plugins.css">
@@ -44,7 +44,7 @@
 			margin: 0;
 			padding: 0;
 		}
-		#personal {
+		#wordlist {
 			box-sizing: border-box;
 			height: 100%;
 			padding: 16px;
@@ -61,11 +61,11 @@
 			resize: none;
 		}
 	</style>
-	<script src="scripts/personal.js"></script>
+	<script src="scripts/wordlist.js"></script>
 </head>
 <body>
-	<div id="personal">
-		<div id="description" class="i18n">Your own words, one per line. They are suggested first and written exactly as entered.</div>
+	<div id="wordlist">
+		<div id="description"></div>
 		<textarea id="words" class="form-control" spellcheck="false"></textarea>
 	</div>
 </body>

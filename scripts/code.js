@@ -45,12 +45,28 @@
 	var g_settingsWindow = null;
 	var g_settingsDraft = null;
 
-	// the user's own words, suggested before the word list and written as entered
-	var g_personalKey = "onlyoffice_autocomplete_personal";
-	var g_personal = [];
-	var g_personalMax = 5000;
-	var g_personalWindow = null;
-	var g_personalDraft = null;
+	// word lists edited by the user
+	var g_lists = {
+		// suggested before the word list and written as entered
+		personal : {
+			key : "onlyoffice_autocomplete_personal",
+			title : "Personal dictionary",
+			description : "Your own words, one per line. They are suggested first and written exactly as entered.",
+			words : []
+		},
+		// never suggested
+		ignored : {
+			key : "onlyoffice_autocomplete_ignored",
+			title : "Ignored words",
+			description : "Words that are never suggested, one per line.",
+			words : []
+		}
+	};
+	var g_ignored = {}; // lower-case ignored words
+	var g_listMax = 5000;
+	var g_listWindow = null;
+	var g_listName = "";
+	var g_listDraft = null;
 
 	function checkSettings(settings)
 	{
@@ -88,12 +104,12 @@
 		}
 	}
 
-	function parsePersonal(text)
+	function parseList(text)
 	{
 		var words = String(text || "").split(/[\s,;]+/);
 		var result = [];
 		var used = {};
-		for (var i = 0; i < words.length && result.length < g_personalMax; i++)
+		for (var i = 0; i < words.length && result.length < g_listMax; i++)
 		{
 			var key = words[i].toLowerCase();
 			if (!key || used[key])
@@ -104,27 +120,48 @@
 		return result;
 	}
 
-	function loadPersonal()
+	function setList(name, text)
 	{
-		try
+		g_lists[name].words = parseList(text);
+		if (name == "ignored")
 		{
-			g_personal = parsePersonal(window.localStorage.getItem(g_personalKey));
-		}
-		catch (err)
-		{
+			g_ignored = {};
+			for (var i = 0; i < g_lists.ignored.words.length; i++)
+				g_ignored[g_lists.ignored.words[i].toLowerCase()] = true;
 		}
 	}
 
-	function savePersonal(text)
+	function loadLists()
 	{
-		g_personal = parsePersonal(text);
+		for (var name in g_lists)
+		{
+			try
+			{
+				setList(name, window.localStorage.getItem(g_lists[name].key));
+			}
+			catch (err)
+			{
+			}
+		}
+	}
+
+	function saveList(name, text)
+	{
+		setList(name, text);
 		try
 		{
-			window.localStorage.setItem(g_personalKey, g_personal.join("\n"));
+			window.localStorage.setItem(g_lists[name].key, g_lists[name].words.join("\n"));
 		}
 		catch (err)
 		{
 		}
+		if (g_settingsWindow)
+			g_settingsWindow.command("onListCounts", getListCounts());
+	}
+
+	function getListCounts()
+	{
+		return { personal : g_lists.personal.words.length, ignored : g_lists.ignored.words.length };
 	}
 
 	// the file lists one word per line, most frequent first;
@@ -157,7 +194,7 @@
 	}
 
 	loadSettings();
-	loadPersonal();
+	loadLists();
 	loadDictionary("./dictionaries/words.txt");
 
 	function closeSettings()
@@ -185,7 +222,7 @@
 				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
 			],
 			EditorsSupport : ["word", "slide", "cell", "pdf"],
-			size : [320, 300]
+			size : [320, 330]
 		};
 
 		g_settingsDraft = null;
@@ -194,34 +231,34 @@
 			if (g_settingsWindow)
 			{
 				g_settingsWindow.command("onSettings", g_settings);
-				g_settingsWindow.command("onPersonalCount", g_personal.length);
+				g_settingsWindow.command("onListCounts", getListCounts());
 			}
 		});
-		g_settingsWindow.attachEvent("onEditPersonal", openPersonal);
+		g_settingsWindow.attachEvent("onEditList", openList);
 		g_settingsWindow.attachEvent("onChange", function(settings) {
 			g_settingsDraft = settings;
 		});
 		g_settingsWindow.show(variation);
 	}
 
-	function closePersonal()
+	function closeList()
 	{
-		if (g_personalWindow)
+		if (g_listWindow)
 		{
-			g_personalWindow.close();
-			g_personalWindow = null;
+			g_listWindow.close();
+			g_listWindow = null;
 		}
-		g_personalDraft = null;
+		g_listDraft = null;
 	}
 
-	function openPersonal()
+	function openList(name)
 	{
-		if (g_personalWindow)
+		if (g_listWindow || !g_lists[name])
 			return;
 
 		var variation = {
-			url : "personal.html",
-			description : window.Asc.plugin.tr("Personal dictionary"),
+			url : "wordlist.html",
+			description : window.Asc.plugin.tr(g_lists[name].title),
 			isVisual : true,
 			isModal : true,
 			buttons : [
@@ -232,16 +269,40 @@
 			size : [320, 340]
 		};
 
-		g_personalDraft = null;
-		g_personalWindow = new window.Asc.PluginWindow();
-		g_personalWindow.attachEvent("onInit", function() {
-			if (g_personalWindow)
-				g_personalWindow.command("onPersonal", g_personal.join("\n"));
+		g_listName = name;
+		g_listDraft = null;
+		g_listWindow = new window.Asc.PluginWindow();
+		g_listWindow.attachEvent("onInit", function() {
+			if (g_listWindow)
+			{
+				g_listWindow.command("onList", {
+					description : window.Asc.plugin.tr(g_lists[name].description),
+					text : g_lists[name].words.join("\n")
+				});
+			}
 		});
-		g_personalWindow.attachEvent("onChange", function(text) {
-			g_personalDraft = text;
+		g_listWindow.attachEvent("onChange", function(text) {
+			g_listDraft = text;
 		});
-		g_personalWindow.show(variation);
+		g_listWindow.show(variation);
+	}
+
+	// a right click on a suggestion adds it to the ignored words
+	function onSuggestionContextMenu(e)
+	{
+		var target = e.target;
+		if (!target || target.tagName != "LI")
+			return;
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		var word = (target.innerText || "").replace(/\s+/g, "");
+		if (!word || g_ignored[word.toLowerCase()])
+			return;
+
+		saveList("ignored", g_lists.ignored.words.concat([word.toLowerCase()]).join("\n"));
+		window.Asc.plugin.event_onInputHelperInput({ text : window.Asc.plugin.currentText, add : false });
 	}
 
 	// a button on the Plugins tab and an item in the context menu open the settings
@@ -292,6 +353,7 @@
 			window.Asc.plugin.currentText = "";
 			window.Asc.plugin.createInputHelper();
 			window.Asc.plugin.getInputHelper().createWindow();
+			document.addEventListener("contextmenu", onSuggestionContextMenu);
 
 			window.Asc.plugin.attachToolbarMenuClickEvent("autocompleteSettings", openSettings);
 			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
@@ -310,15 +372,11 @@
 	{
 		if (windowId)
 		{
-			if (g_personalWindow && g_personalWindow.id === windowId)
+			if (g_listWindow && g_listWindow.id === windowId)
 			{
-				if (id === 0 && g_personalDraft !== null)
-				{
-					savePersonal(g_personalDraft);
-					if (g_settingsWindow)
-						g_settingsWindow.command("onPersonalCount", g_personal.length);
-				}
-				closePersonal();
+				if (id === 0 && g_listDraft !== null)
+					saveList(g_listName, g_listDraft);
+				closeList();
 			}
 			else if (g_settingsWindow && g_settingsWindow.id === windowId)
 			{
@@ -328,7 +386,7 @@
 					window.Asc.plugin.currentText = "";
 					window.Asc.plugin.getInputHelper().unShow();
 				}
-				closePersonal();
+				closeList();
 				closeSettings();
 			}
 			return;
@@ -448,17 +506,18 @@
 		// personal words come first, in the order they were entered
 		var ret = [];
 		var personal = {};
-		for (var p = 0; p < g_personal.length && ret.length < g_settings.maxItems; p++)
+		var words = g_lists.personal.words;
+		for (var p = 0; p < words.length && ret.length < g_settings.maxItems; p++)
 		{
-			var key = g_personal[p].toLowerCase();
-			if (key.indexOf(textFound) != 0 || key == textFound)
+			var key = words[p].toLowerCase();
+			if (key.indexOf(textFound) != 0 || key == textFound || g_ignored[key])
 				continue;
 			personal[key] = true;
 			// written as entered, unless it is all lower case or the typed letters cannot be replaced
-			if (g_personal[p] != key && !isPdfEditor())
-				ret.push(g_personal[p]);
+			if (words[p] != key && !isPdfEditor())
+				ret.push(words[p]);
 			else
-				ret.push(text + g_personal[p].substr(textFound.length));
+				ret.push(text + words[p].substr(textFound.length));
 		}
 
 		var found = [];
@@ -467,7 +526,7 @@
 			if (g_dictionary[index].indexOf(textFound) != 0)
 				break;
 
-			if (personal[g_dictionary[index]])
+			if (personal[g_dictionary[index]] || g_ignored[g_dictionary[index]])
 				continue;
 			var record = g_words[g_dictionary[index]];
 			if ((record.lang == "d" && !g_settings.german) || (record.lang == "e" && !g_settings.english))
