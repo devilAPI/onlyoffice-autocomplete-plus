@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.1
+
+* Fix the selected suggestion not being written in the PDF editor.
+
 ## 1.3.0
 
 * Add a settings window (languages, capitalisation, letters before suggesting, number of suggestions), opened from the Plugins tab or the context menu.

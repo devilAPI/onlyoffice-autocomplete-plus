@@ -19,7 +19,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 * **Ranked by frequency.** Suggestions are ordered by how often a word is used, so `gesch` offers `Geschichte` and `geschafft` before rare words.
 * **German capitalisation.** Nouns and names are suggested with their capital letter. Other words follow what you typed.
 * **Settings in the editor.** Choose the languages, the number of letters before suggestions appear, the number of suggestions, and whether German nouns are capitalised.
-* **PDF editor support.** The plugin is also offered when you edit a PDF.
+* **PDF editor support.** The plugin is also offered when you edit a PDF. The PDF editor does not let a plugin replace typed text, so there the suggestion completes the word as you typed it and German nouns are not capitalised for you.
 * **Fixes.** The original lookup skipped every second matching word and sorted the whole dictionary again on every keystroke.
 
 ## Installation
@@ -73,7 +73,7 @@ After changing the plugin, repack it from the repository root:
 
 ```
 rm deploy/autocomplete.plugin
-zip -r deploy/autocomplete.plugin . -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE'
+zip -r deploy/autocomplete.plugin . -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE' 'IDEAS.md'
 ```
 
 ### Releasing

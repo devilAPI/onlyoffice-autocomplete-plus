@@ -185,6 +185,11 @@
 		}]);
 	};
 
+	function isPdfEditor()
+	{
+		return !!window.Asc.plugin.info && window.Asc.plugin.info.editorType === "pdf";
+	}
+
 	window.isInit = false;
 
 	window.Asc.plugin.init = function(text)
@@ -235,7 +240,19 @@
 		if (!item || !window.Asc.plugin.ih.isVisible)
 			return;
 
-		window.Asc.plugin.executeMethod("InputText", [item.text, window.Asc.plugin.currentText]);
+		if (isPdfEditor())
+		{
+			// InputText does nothing in the PDF editor, so the typed letters
+			// cannot be replaced: add the rest of the word instead
+			var rest = item.text.substr(window.Asc.plugin.currentText.length);
+			if (rest)
+				window.Asc.plugin.executeMethod("PasteText", [rest]);
+			window.Asc.plugin.currentText = "";
+		}
+		else
+		{
+			window.Asc.plugin.executeMethod("InputText", [item.text, window.Asc.plugin.currentText]);
+		}
 		window.Asc.plugin.getInputHelper().unShow();
 	};
 
@@ -347,7 +364,8 @@
 		{
 			var word = found[i].text;
 			// nouns and names keep their capital letter, everything else follows the typed text
-			if (g_settings.capitalize && g_settings.german && word.charAt(0) != word.charAt(0).toLowerCase())
+			// (not in the PDF editor, where the typed letters cannot be replaced)
+			if (g_settings.capitalize && g_settings.german && !isPdfEditor() && word.charAt(0) != word.charAt(0).toLowerCase())
 				ret.push(word);
 			else
 				ret.push(text + word.substr(textFound.length));

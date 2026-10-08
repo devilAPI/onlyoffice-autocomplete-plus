@@ -31,7 +31,7 @@ jobs:
       - name: Build plugin
         run: |
           zip -r "$RUNNER_TEMP/autocomplete.plugin" . \
-            -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE'
+            -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE' 'IDEAS.md'
           unzip -l "$RUNNER_TEMP/autocomplete.plugin"
 
       - name: Release notes
