@@ -9,7 +9,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | Feature | Original plugin | This fork |
 |---|---|---|
 | Languages | English | German and English |
-| Word list | 370,000 words, unranked | 258,000 words, most common first |
+| Word list | 370,000 words, unranked | 409,000 words, most common first |
 | German nouns | - | Capitalised (`hau` → `Haus`) |
 | Personal dictionary | - | Yes |
 | Ignored words | - | Yes |
@@ -88,11 +88,37 @@ The settings, both word lists and the learned words are stored in the editor on 
 | `tools/build_words.py` | Builds the word list |
 | `deploy/autocomplete.plugin` | The installable package |
 
-`dictionaries/words.txt` lists one word per line, most frequent first. A tab followed by `d` or `e` marks a word as only German or only English. Rebuild it from the sources listed under Credits with:
+### How the word list is built
+
+`dictionaries/words.txt` lists one word per line, most frequent first. A tab followed by `d` or `e` marks a word as only German or only English. `tools/build_words.py` downloads the sources and writes the file:
 
 ```
 python3 tools/build_words.py
 ```
+
+Each language has a spelling list, which decides what is a word, and two frequency lists, which decide how common it is:
+
+| | German | English |
+|---|---|---|
+| Spelling list | wordlist-german, 1.9 million word forms | english-words, 370,000 words |
+| Everyday language | OpenSubtitles 2018, 156 million words of film subtitles | OpenSubtitles 2018, 735 million words |
+| Formal language | German Wikipedia (2022), 863 million words | English Wikipedia (2023), 2.5 billion words |
+| A word is kept if it occurs | 3 times in the subtitles or 50 times in Wikipedia | 10 times in the subtitles or 50 times in Wikipedia |
+| Words kept | 307,000 | 113,000 |
+
+For each language the script does this:
+
+1. It takes the words of the spelling list that have at least four letters and consist only of the letters a to z, ä, ö, ü and ß. Shorter words are left out because the suggestions appear after three letters. The frequency lists are full of names, typos and foreign words; a word that is not in the spelling list is dropped.
+2. It counts how often each of these words occurs per million words in the subtitles and in Wikipedia, and takes the mean of the two as the frequency of the word. The subtitles alone favour spoken language (`Entschuldigung` before `Entwicklung`); Wikipedia adds the vocabulary of school, work and technical writing.
+3. It keeps the words that occur often enough in at least one of the two, as given in the table. The numbers differ because the collections of text differ in size.
+
+Then the two languages are put together:
+
+* The list is ordered by frequency. A word found in both languages, like `system`, is listed once with the higher of its two frequencies.
+* A word is marked as only German or only English if it is at least 20 times more frequent in that language, or not found in the other at all. The remaining 10,000 words belong to both and are suggested whichever language is switched on.
+* The frequency lists are all lower case. A German word gets its capital letter back from the spelling list, which has `Haus` but not `haus`. This is not done if the word is more frequent in English.
+
+The result is 409,000 words: 296,000 only German, 103,000 only English.
 
 After changing the plugin, repack it from the repository root:
 
@@ -109,6 +135,7 @@ Raise the version in `config.json`, describe the changes in `CHANGELOG.md`, then
 
 * [ONLYOFFICE](https://github.com/ONLYOFFICE/onlyoffice.github.io) - the original Autocomplete plugin (GNU AGPL v3.0).
 * [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave - word frequencies built from OpenSubtitles 2018 (content licensed CC BY-SA 4.0).
+* [wikipedia-word-frequency](https://github.com/IlyaSemenov/wikipedia-word-frequency) by Ilya Semenov - word frequencies built from the German and English Wikipedia (MIT; Wikipedia text is licensed CC BY-SA).
 * [wordlist-german](https://gist.github.com/MarvinJWendt/2f4f4154b8ae218600eb091a5706b5f4) by Marvin Wendt - German spelling list used to filter the frequency data.
 * [english-words](https://github.com/dwyl/english-words) by dwyl - English spelling list used to filter the frequency data (Unlicense).
 

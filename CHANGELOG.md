@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.8.0
+
+* Rank the words by how often they occur in Wikipedia as well as in film subtitles, so that the words of formal and technical writing come earlier (`Entwicklung`, `Funktion`, `implementation`).
+* Add 151,000 words that are common in Wikipedia: the word list now has 409,000 words.
+
 ## 1.7.1
 
 * A word that was chosen only once is no longer moved to the top of the suggestions; it is from the second time on.

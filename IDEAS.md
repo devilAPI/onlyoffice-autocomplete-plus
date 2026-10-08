@@ -11,7 +11,6 @@ Possible features, roughly in order of usefulness.
 * **Next-word prediction** - after you finish a word, suggest the likely next one ("vielen" → "Dank"). Needs word-pair frequency data, which is a bigger word-list rebuild.
 * **Typo tolerance** - still suggest "Geschichte" when you type "Geshci". Needs a fuzzy lookup; the hardest item here.
 * **Automatic language detection** - look at the last few typed words and prefer that language instead of mixing both.
-* **Formal vocabulary** - the ranking comes from film subtitles, so it leans conversational. Blending in a news or Wikipedia frequency list would suit school and work writing better.
 
 ## More settings
 
@@ -21,6 +20,6 @@ Possible features, roughly in order of usefulness.
 
 ## Project housekeeping
 
-* **Smaller, faster load** - the word list is about 3 MB and is parsed on every start; a compact prebuilt format would cut the startup delay.
+* **Smaller, faster load** - the word list is about 5.5 MB and is parsed on every start; a compact prebuilt format would cut the startup delay.
 * **Tests in the release workflow** - turn the lookup and settings checks into a test step so a broken build cannot be released.
 * **Plugin Manager listing** - offer the fork upstream or host a store entry, so it installs without downloading a file.
