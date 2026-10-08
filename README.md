@@ -1,4 +1,4 @@
-# Autocomplete for ONLYOFFICE - German and English
+# Autocomplete Plus for ONLYOFFICE
 
 A plugin for ONLYOFFICE editors that suggests German and English words while you type, most common words first. It works in documents, spreadsheets, presentations and PDFs.
 
