@@ -13,6 +13,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | German nouns | - | Capitalised (`hau` → `Haus`) |
 | Personal dictionary | - | Yes |
 | Ignored words | - | Yes |
+| Learns the words you choose | - | Yes |
 | Settings window | - | Yes |
 | PDF editor | - | Yes |
 | Interface languages | English | English and German |
@@ -46,6 +47,7 @@ Click the **Autocomplete** button on the Plugins tab, or right-click in the docu
 | German | Suggest German words | On |
 | English | Suggest English words | On |
 | Capitalise German nouns | Suggest `Haus` when you type `hau` | On |
+| Show the words I choose first | Words you picked before move to the top of the list | On |
 | Letters before suggesting | Letters you type before the suggestions appear, 1 to 6 | 3 |
 | Maximum number of suggestions | 1 to 100 | 30 |
 
@@ -57,7 +59,11 @@ In the settings window, click **Edit** next to *Personal dictionary* and enter y
 
 To stop a word from being suggested, right-click it in the list of suggestions. To review the ignored words or bring one back, click **Edit** next to *Ignored words* in the settings window.
 
-The settings and both word lists are stored in the editor on your device.
+### Learned words
+
+Each time you choose a suggestion, the plugin remembers it and shows it earlier the next time: the more often you pick a word, the higher it appears. Click **Reset** next to *Learned words* in the settings window to forget them all.
+
+The settings, both word lists and the learned words are stored in the editor on your device.
 
 ## Development
 

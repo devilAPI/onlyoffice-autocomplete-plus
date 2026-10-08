@@ -31,9 +31,9 @@
  */
 (function(window, undefined){
 
-	var g_checks = ["german", "english", "capitalize"];
+	var g_checks = ["german", "english", "capitalize", "learn"];
 	var g_numbers = ["minLength", "maxItems"];
-	var g_listCounts = { personal : 0, ignored : 0 };
+	var g_listCounts = { personal : 0, ignored : 0, learned : 0 };
 
 	function readSettings()
 	{
@@ -79,6 +79,9 @@
 		});
 		document.getElementById("editIgnored").addEventListener("click", function() {
 			window.Asc.plugin.sendToPlugin("onEditList", "ignored");
+		});
+		document.getElementById("resetLearned").addEventListener("click", function() {
+			window.Asc.plugin.sendToPlugin("onResetLearned");
 		});
 
 		g_checks.concat(g_numbers).forEach(function(id) {

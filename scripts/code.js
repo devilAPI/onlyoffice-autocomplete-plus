@@ -39,6 +39,7 @@
 		german : true,
 		english : true,
 		capitalize : true, // suggest German nouns with a capital letter
+		learn : true,      // suggest the words that were chosen before first
 		minLength : 3,     // typed letters before the suggestions appear
 		maxItems : 30
 	};
@@ -63,6 +64,11 @@
 		}
 	};
 	var g_ignored = {}; // lower-case ignored words
+
+	// how often each suggestion was chosen: lower-case word -> count
+	var g_usageKey = "onlyoffice_autocomplete_usage";
+	var g_usage = {};
+	var g_usageMax = 3000;
 	var g_listMax = 5000;
 	var g_listWindow = null;
 	var g_listName = "";
@@ -161,7 +167,69 @@
 
 	function getListCounts()
 	{
-		return { personal : g_lists.personal.words.length, ignored : g_lists.ignored.words.length };
+		return {
+			personal : g_lists.personal.words.length,
+			ignored : g_lists.ignored.words.length,
+			learned : Object.keys(g_usage).length
+		};
+	}
+
+	function loadUsage()
+	{
+		try
+		{
+			var usage = JSON.parse(window.localStorage.getItem(g_usageKey));
+			g_usage = {};
+			for (var word in usage)
+			{
+				if (typeof usage[word] === "number" && usage[word] > 0)
+					g_usage[word] = usage[word];
+			}
+		}
+		catch (err)
+		{
+		}
+	}
+
+	function saveUsage()
+	{
+		try
+		{
+			window.localStorage.setItem(g_usageKey, JSON.stringify(g_usage));
+		}
+		catch (err)
+		{
+		}
+	}
+
+	function recordUse(word)
+	{
+		if (!g_settings.learn || !word)
+			return;
+
+		var key = word.toLowerCase();
+		g_usage[key] = (g_usage[key] || 0) + 1;
+
+		// forget the least used words when there are too many
+		var words = Object.keys(g_usage);
+		if (words.length > g_usageMax)
+		{
+			words.sort(function(a, b) { return g_usage[b] - g_usage[a]; });
+			for (var i = Math.round(g_usageMax * 0.9); i < words.length; i++)
+			{
+				if (words[i] != key)
+					delete g_usage[words[i]];
+			}
+		}
+		saveUsage();
+	}
+
+	function resetUsage()
+	{
+		g_usage = {};
+		saveUsage();
+		if (g_settingsWindow)
+			g_settingsWindow.command("onListCounts", getListCounts());
 	}
 
 	// the file lists one word per line, most frequent first;
@@ -195,6 +263,7 @@
 
 	loadSettings();
 	loadLists();
+	loadUsage();
 	loadDictionary("./dictionaries/words.txt");
 
 	function closeSettings()
@@ -222,7 +291,7 @@
 				{ text : window.Asc.plugin.tr("Cancel"), primary : false }
 			],
 			EditorsSupport : ["word", "slide", "cell", "pdf"],
-			size : [320, 330]
+			size : [320, 390]
 		};
 
 		g_settingsDraft = null;
@@ -235,6 +304,7 @@
 			}
 		});
 		g_settingsWindow.attachEvent("onEditList", openList);
+		g_settingsWindow.attachEvent("onResetLearned", resetUsage);
 		g_settingsWindow.attachEvent("onChange", function(settings) {
 			g_settingsDraft = settings;
 		});
@@ -437,6 +507,8 @@
 		if (!item || !window.Asc.plugin.ih.isVisible)
 			return;
 
+		recordUse(item.text);
+
 		if (isPdfEditor())
 		{
 			// InputText does nothing in the PDF editor
@@ -582,7 +654,13 @@
 			found.push(record);
 		}
 
-		found.sort(function(a, b) { return a.rank - b.rank; });
+		// the words chosen most often first, then the most frequent ones
+		var learn = g_settings.learn;
+		found.sort(function(a, b) {
+			var usedA = learn ? (g_usage[a.text.toLowerCase()] || 0) : 0;
+			var usedB = learn ? (g_usage[b.text.toLowerCase()] || 0) : 0;
+			return (usedB - usedA) || (a.rank - b.rank);
+		});
 
 		for (var i = 0; i < found.length && ret.length < g_settings.maxItems; i++)
 		{

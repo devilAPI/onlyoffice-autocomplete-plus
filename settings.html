@@ -99,6 +99,10 @@
 			<label for="capitalize" class="i18n">Capitalise German nouns</label>
 		</div>
 		<div class="row">
+			<input type="checkbox" id="learn">
+			<label for="learn" class="i18n">Show the words I choose first</label>
+		</div>
+		<div class="row">
 			<label for="minLength" class="i18n">Letters before suggesting</label>
 			<input type="number" id="minLength" class="form-control" min="1" max="6" step="1">
 		</div>
@@ -116,6 +120,11 @@
 			<label class="i18n">Ignored words</label>
 			<span class="count" id="ignoredCount"></span>
 			<button id="editIgnored" class="btn-text-default i18n">Edit</button>
+		</div>
+		<div class="row">
+			<label class="i18n">Learned words</label>
+			<span class="count" id="learnedCount"></span>
+			<button id="resetLearned" class="btn-text-default i18n">Reset</button>
 		</div>
 	</div>
 </body>

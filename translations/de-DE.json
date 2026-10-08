@@ -15,5 +15,8 @@
 	"Your own words, one per line. They are suggested first and written exactly as entered.": "Eigene Wörter, eines pro Zeile. Sie werden zuerst vorgeschlagen und genau so geschrieben, wie sie eingegeben wurden.",
 	"Your words": "Eigene Wörter",
 	"Ignored words": "Ignorierte Wörter",
-	"Words that are never suggested, one per line.": "Wörter, die nie vorgeschlagen werden, eines pro Zeile."
+	"Words that are never suggested, one per line.": "Wörter, die nie vorgeschlagen werden, eines pro Zeile.",
+	"Show the words I choose first": "Gewählte Wörter zuerst anzeigen",
+	"Learned words": "Gelernte Wörter",
+	"Reset": "Zurücksetzen"
 }

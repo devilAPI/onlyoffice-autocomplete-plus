@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.0
+
+* Learn from use: the words you choose are suggested first. Can be switched off and reset in the settings.
+
 ## 1.5.0
 
 * Add ignored words: words that are never suggested. Right-click a suggestion to ignore it, or edit the list in the settings.
