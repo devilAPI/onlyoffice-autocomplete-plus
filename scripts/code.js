@@ -498,7 +498,7 @@
 		{
 			window.isInit = true;
 
-			window.Asc.plugin.currentText = "";
+			resetTyped();
 			window.Asc.plugin.createInputHelper();
 			window.Asc.plugin.getInputHelper().createWindow();
 			document.addEventListener("contextmenu", onSuggestionContextMenu);
@@ -556,7 +556,7 @@
 				if (id === 0 && g_settingsDraft)
 				{
 					saveSettings(g_settingsDraft);
-					window.Asc.plugin.currentText = "";
+					resetTyped();
 					window.Asc.plugin.getInputHelper().unShow();
 				}
 				closeList();
@@ -568,44 +568,80 @@
 		this.executeCommand("close", "");
 	};
 	
+	// What was typed since the cursor was last moved, as far as the plugin knows.
+	// The editor reports only the letters typed since it last cleared its input,
+	// which it does after a space, after backspace and after a suggestion is
+	// written; the plugin keeps the text typed before that itself, so that the
+	// word in front of the cursor is still known afterwards.
+	var g_typed = "";       // everything typed, ends in the current word
+	var g_typedBase = "";   // the part of it typed before the editor's current input
+	var g_editorText = "";  // the editor's current input
+	var g_staleText = "";   // a part of the editor's input that is not in the document any more
+	var g_accepted = "";    // the suggestion that was just written
+	var g_inputTime = 0;
+	var g_backspaceTime = 0;
+
+	function setTyped(text)
+	{
+		g_typed = text.length > 200 ? text.slice(-200) : text;
+		window.Asc.plugin.currentText = g_typed.substr(g_typed.lastIndexOf(" ") + 1);
+	}
+
+	function resetTyped()
+	{
+		g_typedBase = "";
+		g_staleText = "";
+		g_accepted = "";
+		setTyped("");
+	}
+
 	window.Asc.plugin.inputHelper_onSelectItem = function(item)
 	{
 		if (!item || !window.Asc.plugin.ih.isVisible)
 			return;
 
 		recordUse(item.text);
-		g_keptText = "";
+
+		var typed = window.Asc.plugin.currentText;
+		var written = item.text;
+		g_typedBase = g_typed.slice(0, g_typed.length - typed.length);
 
 		if (isPdfEditor())
 		{
 			// InputText does nothing in the PDF editor
-			var typed = window.Asc.plugin.currentText;
 			var rest = item.text.substr(typed.length);
 			var api = getPdfApi();
 			if (api)
 			{
 				if (false === api.asc_correctEnterText(getCodePoints(typed), getCodePoints(item.text)) && rest)
+				{
 					api.asc_enterText(getCodePoints(rest));
+					written = typed + rest;
+				}
 			}
-			else if (rest)
+			else
 			{
 				// the typed letters cannot be replaced: add the rest of the word
-				window.Asc.plugin.executeMethod("PasteText", [rest]);
+				if (rest)
+					window.Asc.plugin.executeMethod("PasteText", [rest]);
+				written = typed + rest;
 			}
-			window.Asc.plugin.currentText = "";
+
+			// the editor's input still holds the typed letters
+			g_typedBase += written;
+			g_staleText = g_editorText;
+			setTyped(g_typedBase);
 		}
 		else
 		{
-			window.Asc.plugin.executeMethod("InputText", [item.text, window.Asc.plugin.currentText]);
+			// the editor's input becomes the written word
+			window.Asc.plugin.executeMethod("InputText", [item.text, typed]);
+			setTyped(g_typedBase + written);
 		}
+
+		g_accepted = written;
 		window.Asc.plugin.getInputHelper().unShow();
 	};
-
-	// The editor forgets the typed word when backspace is pressed and reports
-	// only the letters typed after it. Keep the rest of the word here, so that
-	// correcting a typo does not start the word again.
-	var g_keptText = "";
-	var g_backspaceTime = 0;
 
 	function onEditorKeyDown(e)
 	{
@@ -617,37 +653,55 @@
 	{
 		var isBackspace = (Date.now() - g_backspaceTime) < 500;
 		g_backspaceTime = 0;
+		g_editorText = "";
+		g_staleText = "";
 
-		if (isBackspace && window.Asc.plugin.currentText.length > 1)
+		if (isBackspace)
 		{
-			g_keptText = window.Asc.plugin.currentText.slice(0, -1);
-			window.Asc.plugin.currentText = g_keptText;
+			g_accepted = "";
+			g_typedBase = g_typed.slice(0, -1);
+			setTyped(g_typedBase);
 			showSuggestions();
 			return;
 		}
 
-		g_keptText = "";
-		window.Asc.plugin.currentText = "";
+		// cleared by the character that was just typed (a space, a full stop):
+		// the cursor has not moved
+		if ((Date.now() - g_inputTime) < 150)
+		{
+			g_typedBase = g_typed;
+			return;
+		}
+
+		resetTyped();
 		window.Asc.plugin.getInputHelper().unShow();
 	};
 
 	window.Asc.plugin.event_onInputHelperInput = function(data)
 	{
 		if (data.add)
-			window.Asc.plugin.currentText += data.text;
-		else
-			window.Asc.plugin.currentText = g_keptText + data.text;
-
-		// correct by space
-		var lastIndexSpace = window.Asc.plugin.currentText.lastIndexOf(" ");
-		if (lastIndexSpace >= 0)
 		{
-			g_keptText = "";
-			if (lastIndexSpace == (window.Asc.plugin.currentText.length - 1))
-				window.Asc.plugin.currentText = "";
-			else
-				window.Asc.plugin.currentText = window.Asc.plugin.currentText.substr(lastIndexSpace + 1);
+			setTyped(g_typed + data.text);
 		}
+		else
+		{
+			var text = data.text;
+			g_editorText = text;
+			if (g_staleText && 0 === text.indexOf(g_staleText))
+				text = text.substr(g_staleText.length);
+			else
+				g_staleText = "";
+			setTyped(g_typedBase + text);
+		}
+		g_inputTime = Date.now();
+
+		// no suggestions for the word that was just chosen
+		if (g_accepted && g_accepted.toLowerCase() === window.Asc.plugin.currentText.toLowerCase())
+		{
+			window.Asc.plugin.getInputHelper().unShow();
+			return;
+		}
+		g_accepted = "";
 
 		showSuggestions();
 	};
@@ -741,6 +795,9 @@
 			if (g_dictionary[index].indexOf(textFound) != 0)
 				break;
 
+			// not the word that is already typed
+			if (g_dictionary[index] == textFound)
+				continue;
 			if (personal[g_dictionary[index]] || g_ignored[g_dictionary[index]])
 				continue;
 			var record = g_words[g_dictionary[index]];

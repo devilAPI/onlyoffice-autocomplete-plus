@@ -2,7 +2,8 @@
 
 ## 1.6.1
 
-* Fix the suggestions starting again after backspace: deleting a letter now keeps the rest of the word.
+* Fix the suggestions starting again after backspace: the plugin now remembers what was typed, so deleting letters continues the word, also after a space or after a suggestion was chosen.
+* No longer suggest the word that is already typed in full, and do not reopen the list right after a suggestion was chosen.
 
 ## 1.6.0
 
