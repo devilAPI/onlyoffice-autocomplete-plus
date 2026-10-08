@@ -80,7 +80,7 @@
 		document.getElementById("editIgnored").addEventListener("click", function() {
 			window.Asc.plugin.sendToPlugin("onEditList", "ignored");
 		});
-		document.getElementById("viewLearned").addEventListener("click", function() {
+		document.getElementById("editLearned").addEventListener("click", function() {
 			window.Asc.plugin.sendToPlugin("onEditList", "learned");
 		});
 		document.getElementById("resetLearned").addEventListener("click", function() {

@@ -38,7 +38,6 @@
 		window.Asc.plugin.attachEvent("onList", function(list) {
 			document.getElementById("description").innerText = list.description;
 			words.value = list.text;
-			words.readOnly = !!list.readOnly;
 			words.focus();
 		});
 		words.addEventListener("input", function() {

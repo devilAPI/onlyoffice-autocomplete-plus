@@ -334,44 +334,38 @@
 		return words.join("\n");
 	}
 
+	// keeps the words that are still listed, each as "word" or "word (count)"
+	function setLearnedText(text)
+	{
+		var lines = String(text || "").split(/\r?\n/);
+		g_usage = {};
+		for (var i = 0; i < lines.length; i++)
+		{
+			var match = /^\s*(\S+)\s*(?:\((\d+)\))?\s*$/.exec(lines[i]);
+			if (!match)
+				continue;
+			g_usage[match[1].toLowerCase()] = Math.max(1, parseInt(match[2]) || 1);
+		}
+		saveUsage();
+		if (g_settingsWindow)
+			g_settingsWindow.command("onListCounts", getListCounts());
+	}
+
 	function openList(name)
 	{
 		if (g_listWindow)
 			return;
 
-		if (name == "learned")
-		{
-			g_listName = name;
-			g_listDraft = null;
-			g_listWindow = new window.Asc.PluginWindow();
-			g_listWindow.attachEvent("onInit", function() {
-				if (g_listWindow)
-				{
-					g_listWindow.command("onList", {
-						description : window.Asc.plugin.tr("The words you have chosen and how often, most chosen first."),
-						text : getLearnedText(),
-						readOnly : true
-					});
-				}
-			});
-			g_listWindow.show({
-				url : "wordlist.html",
-				description : window.Asc.plugin.tr("Learned words"),
-				isVisual : true,
-				isModal : true,
-				buttons : [ { text : window.Asc.plugin.tr("Close"), primary : true } ],
-				EditorsSupport : ["word", "slide", "cell", "pdf"],
-				size : [320, 340]
-			});
-			return;
-		}
-
-		if (!g_lists[name])
+		var list = (name == "learned") ? {
+			title : "Learned words",
+			description : "The words you have chosen and how often, most chosen first. Delete a line to forget the word."
+		} : g_lists[name];
+		if (!list)
 			return;
 
 		var variation = {
 			url : "wordlist.html",
-			description : window.Asc.plugin.tr(g_lists[name].title),
+			description : window.Asc.plugin.tr(list.title),
 			isVisual : true,
 			isModal : true,
 			buttons : [
@@ -389,8 +383,8 @@
 			if (g_listWindow)
 			{
 				g_listWindow.command("onList", {
-					description : window.Asc.plugin.tr(g_lists[name].description),
-					text : g_lists[name].words.join("\n")
+					description : window.Asc.plugin.tr(list.description),
+					text : (name == "learned") ? getLearnedText() : list.words.join("\n")
 				});
 			}
 		});
@@ -524,8 +518,13 @@
 		{
 			if (g_listWindow && g_listWindow.id === windowId)
 			{
-				if (id === 0 && g_listDraft !== null && g_lists[g_listName])
-					saveList(g_listName, g_listDraft);
+				if (id === 0 && g_listDraft !== null)
+				{
+					if (g_listName == "learned")
+						setLearnedText(g_listDraft);
+					else
+						saveList(g_listName, g_listDraft);
+				}
 				closeList();
 			}
 			else if (g_settingsWindow && g_settingsWindow.id === windowId)
