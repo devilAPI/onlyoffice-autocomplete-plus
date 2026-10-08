@@ -35,6 +35,8 @@
 
 	const store = window.Autocomplete.store;
 
+	const MIN_USE_COUNT = 2;
+
 	let sorted = null;         // lower-case words, sorted for the prefix search; null until the list is loaded
 	const records = new Map(); // lower-case word -> { rank, text, lang }, rank 0 is the most frequent
 
@@ -140,8 +142,12 @@
 				continue;
 
 			const record = records.get(key);
-			if (isWanted(record.lang))
-				found.push({ record : record, used : settings.learn ? store.getUseCount(key) : 0 });
+			if (!isWanted(record.lang))
+				continue;
+
+			// a word chosen only once is not moved up: it may have been chosen by accident
+			const used = settings.learn ? store.getUseCount(key) : 0;
+			found.push({ record : record, used : used >= MIN_USE_COUNT ? used : 0 });
 		}
 
 		// the words chosen most often first, then the most frequent ones

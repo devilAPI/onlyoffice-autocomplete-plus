@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.1
+
+* A word that was chosen only once is no longer moved to the top of the suggestions; it is from the second time on.
+
 ## 1.7.0
 
 * Add a setting to write a space after the chosen suggestion. It is switched off by default.
