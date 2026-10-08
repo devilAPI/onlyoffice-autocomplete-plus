@@ -3,8 +3,7 @@
 ## 1.5.0
 
 * Add ignored words: words that are never suggested. Right-click a suggestion to ignore it, or edit the list in the settings.
-* Fix the selected suggestion not being written in text boxes in the PDF editor; in the desktop editors German nouns are now capitalised in PDFs too.
-* Fix Enter, Tab and the arrow keys not reaching the suggestion list when existing text of a PDF is edited.
+* Fix the selected suggestion not being written in the PDF editor: the plugin did not recognise the PDF editor. In the desktop editors German nouns are now capitalised in PDFs too.
 
 ## 1.4.0
 

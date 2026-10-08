@@ -339,7 +339,9 @@
 
 	function isPdfEditor()
 	{
-		return !!window.Asc.plugin.info && window.Asc.plugin.info.editorType === "pdf";
+		// the PDF editor is built on the document editor and reports itself as "word" with the sub type "pdf"
+		var info = window.Asc.plugin.info;
+		return !!info && (info.editorType === "pdf" || info.editorSubType === "pdf");
 	}
 
 	// The editor API of the PDF editor, if the plugin can reach it (it can in the
@@ -362,48 +364,6 @@
 	function canReplaceTyped()
 	{
 		return !isPdfEditor() || null !== getPdfApi();
-	}
-
-	// When existing text of a PDF is edited, the editor does not pass the keys
-	// to the suggestion list, so take them from the editor window.
-	function onPdfEditorKeyDown(e)
-	{
-		var helper = window.Asc.plugin.ih;
-		if (!helper || !helper.isVisible || !window.Asc.plugin.event_onKeyDown)
-			return;
-
-		switch (e.keyCode)
-		{
-			case 9:  // tab
-			case 13: // enter
-			case 27: // escape
-			case 33: // page up
-			case 34: // page down
-			case 35: // end
-			case 36: // home
-			case 38: // up
-			case 40: // down
-				e.preventDefault();
-				e.stopImmediatePropagation();
-				window.Asc.plugin.event_onKeyDown({ keyCode : e.keyCode });
-				break;
-			default:
-				break;
-		}
-	}
-
-	function watchPdfEditorKeys()
-	{
-		if (!isPdfEditor() || !getPdfApi())
-			return;
-
-		try
-		{
-			window.parent.document.addEventListener("keydown", onPdfEditorKeyDown, true);
-		}
-		catch (err)
-		{
-		}
 	}
 
 	function getCodePoints(text)
@@ -431,7 +391,6 @@
 			window.Asc.plugin.createInputHelper();
 			window.Asc.plugin.getInputHelper().createWindow();
 			document.addEventListener("contextmenu", onSuggestionContextMenu);
-			watchPdfEditorKeys();
 
 			window.Asc.plugin.attachToolbarMenuClickEvent("autocompleteSettings", openSettings);
 			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
