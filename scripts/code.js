@@ -413,7 +413,7 @@
 			return;
 
 		saveList("ignored", g_lists.ignored.words.concat([word.toLowerCase()]).join("\n"));
-		window.Asc.plugin.event_onInputHelperInput({ text : window.Asc.plugin.currentText, add : false });
+		showSuggestions();
 	}
 
 	// a button on the Plugins tab and an item in the context menu open the settings
@@ -506,6 +506,15 @@
 			window.Asc.plugin.attachToolbarMenuClickEvent("autocompleteSettings", openSettings);
 			window.Asc.plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", openSettings);
 			registerMenus();
+
+			// the suggestion list has just set its key handler: watch the keys before it
+			var onListKeyDown = window.Asc.plugin.event_onKeyDown;
+			window.Asc.plugin.event_onKeyDown = function(e)
+			{
+				onEditorKeyDown(e);
+				if (onListKeyDown)
+					return onListKeyDown.apply(this, arguments);
+			};
 		}
 	};
 
@@ -554,6 +563,7 @@
 			return;
 
 		recordUse(item.text);
+		g_keptText = "";
 
 		if (isPdfEditor())
 		{
@@ -580,8 +590,32 @@
 		window.Asc.plugin.getInputHelper().unShow();
 	};
 
+	// The editor forgets the typed word when backspace is pressed and reports
+	// only the letters typed after it. Keep the rest of the word here, so that
+	// correcting a typo does not start the word again.
+	var g_keptText = "";
+	var g_backspaceTime = 0;
+
+	function onEditorKeyDown(e)
+	{
+		if (e && e.keyCode === 8)
+			g_backspaceTime = Date.now();
+	}
+
 	window.Asc.plugin.event_onInputHelperClear = function()
 	{
+		var isBackspace = (Date.now() - g_backspaceTime) < 500;
+		g_backspaceTime = 0;
+
+		if (isBackspace && window.Asc.plugin.currentText.length > 1)
+		{
+			g_keptText = window.Asc.plugin.currentText.slice(0, -1);
+			window.Asc.plugin.currentText = g_keptText;
+			showSuggestions();
+			return;
+		}
+
+		g_keptText = "";
 		window.Asc.plugin.currentText = "";
 		window.Asc.plugin.getInputHelper().unShow();
 	};
@@ -591,18 +625,24 @@
 		if (data.add)
 			window.Asc.plugin.currentText += data.text;
 		else
-			window.Asc.plugin.currentText = data.text;
+			window.Asc.plugin.currentText = g_keptText + data.text;
 
 		// correct by space
 		var lastIndexSpace = window.Asc.plugin.currentText.lastIndexOf(" ");
 		if (lastIndexSpace >= 0)
 		{
+			g_keptText = "";
 			if (lastIndexSpace == (window.Asc.plugin.currentText.length - 1))
 				window.Asc.plugin.currentText = "";
 			else
 				window.Asc.plugin.currentText = window.Asc.plugin.currentText.substr(lastIndexSpace + 1);
 		}
 
+		showSuggestions();
+	};
+
+	function showSuggestions()
+	{
 		if (window.Asc.plugin.currentText.length < g_settings.minLength)
 		{
 			window.Asc.plugin.getInputHelper().unShow();
@@ -626,7 +666,7 @@
 			var _sizes = getInputHelperSize();
 			window.Asc.plugin.getInputHelper().show(_sizes.w, _sizes.h, false);
 		}
-	};
+	}
 
 	function getInputHelperSize()
 	{

@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.1
+
+* Fix the suggestions starting again after backspace: deleting a letter now keeps the rest of the word.
+
 ## 1.6.0
 
 * Learn from use: the words you choose are suggested first. Can be switched off, edited and reset in the settings.
