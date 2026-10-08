@@ -1,0 +1,54 @@
+name: Release
+
+# Run manually from the Actions tab. The version is read from config.json,
+# so raise it there (and describe it in CHANGELOG.md) before releasing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          version=$(jq -r .version config.json)
+          if [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "::error::No version in config.json"
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "::error::Release v$version already exists. Raise the version in config.json first."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build plugin
+        run: |
+          zip -r "$RUNNER_TEMP/autocomplete.plugin" . \
+            -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE'
+          unzip -l "$RUNNER_TEMP/autocomplete.plugin"
+
+      - name: Release notes
+        run: |
+          # the section of CHANGELOG.md for this version
+          awk -v version="${{ steps.version.outputs.version }}" '
+            /^## / { found = ($2 == version); next }
+            found
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            "$RUNNER_TEMP/autocomplete.plugin" \
+            --target "$GITHUB_SHA" \
+            --title "Autocomplete ${{ steps.version.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/notes.md"

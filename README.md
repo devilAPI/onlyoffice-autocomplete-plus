@@ -24,7 +24,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 
 ## Installation
 
-1. Download [autocomplete.plugin](deploy/autocomplete.plugin).
+1. Download `autocomplete.plugin` from the [latest release](https://github.com/devilAPI/onlyoffice-autocomplete-de-en/releases/latest).
 2. If the original Autocomplete plugin is installed, remove it first in *Plugins → Plugin Manager*.
 3. In the editor, open *Plugins → Plugin Manager → Available plugins → Install plugin manually* and select the downloaded file.
 4. Restart the editor.
@@ -73,8 +73,12 @@ After changing the plugin, repack it from the repository root:
 
 ```
 rm deploy/autocomplete.plugin
-zip -r deploy/autocomplete.plugin . -x 'deploy/*' 'tools/*' '.git/*' '.gitignore' 'LICENSE'
+zip -r deploy/autocomplete.plugin . -x 'deploy/*' 'tools/*' '.git/*' '.github/*' '.gitignore' 'LICENSE'
 ```
+
+### Releasing
+
+Raise the version in `config.json`, describe the changes in `CHANGELOG.md`, then run the **Release** workflow from the Actions tab. It builds the plugin and publishes it as a GitHub release named after the version.
 
 ## Credits
 
