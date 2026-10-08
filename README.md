@@ -14,6 +14,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | Personal dictionary | - | Yes |
 | Ignored words | - | Yes |
 | Learns the words you choose | - | Yes |
+| Continues a word after backspace | - | Yes |
 | Settings window | - | Yes |
 | PDF editor | - | Yes |
 | Interface languages | English | English and German |
@@ -32,11 +33,13 @@ The plugin is compatible with the [desktop](https://github.com/ONLYOFFICE/Deskto
 ## Usage
 
 1. Start typing. After three letters a list of suggestions appears.
-2. Click the word you want, or keep typing to narrow the list.
+2. Press Enter to take the first word, or pick another one with the arrow keys or a click. Keep typing to narrow the list; Escape closes it.
 
 The plugin runs in the background. You can switch it on and off in the list of background plugins on the Plugins tab.
 
-In text documents the plugin reads the word in front of the cursor from the document, so the suggestions follow you when you delete letters or click into a word typed earlier. Spreadsheets, presentations and PDFs do not offer that: there the plugin knows only what you typed since you last moved the cursor.
+Deleting letters does not start over: the suggestions continue with the word in front of the cursor, also after a space or after a suggestion was chosen.
+
+In text documents the plugin reads that word from the document, so it also works when you click into a word typed earlier and go on typing. Spreadsheets, presentations and PDFs do not offer that: there the plugin knows only what you typed since you last moved the cursor, and starts a new word after you move it.
 
 In the PDF editor of the self-hosted version a plugin cannot replace text you have typed, so there the suggestion completes the word in the case you typed it: German nouns are not capitalised for you. The desktop editors are not affected.
 
@@ -73,7 +76,7 @@ The settings, both word lists and the learned words are stored in the editor on 
 |---|---|
 | `scripts/code.js` | The background plugin: word lookup, settings, toolbar button and context menu item |
 | `settings.html`, `scripts/settings.js` | The settings window |
-| `wordlist.html`, `scripts/wordlist.js` | The editor for the personal dictionary and the ignored words |
+| `wordlist.html`, `scripts/wordlist.js` | The editor for the personal dictionary, the ignored words and the learned words |
 | `dictionaries/words.txt` | The word list |
 | `translations/` | Interface translations |
 | `tools/build_words.py` | Builds the word list |
