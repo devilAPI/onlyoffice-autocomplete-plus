@@ -16,10 +16,11 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | Learns the words you choose | - | Yes |
 | Continues a word after backspace | - | Yes |
 | Settings window | - | Yes |
-| PDF editor | - | Yes |
+| PDF editor Support | - | Yes |
+| ONLYOFFICE Theme Support | - | Yes |
 | Interface languages | English | English and German |
 
-It also fixes two bugs in the original: every second matching word was skipped, and the whole dictionary was sorted again on every keystroke.
+It also fixes various performance issues and was refactored.
 
 ## Installation
 
