@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.0
+
+* Show the list of suggestions in the colors of the editor theme, so that it is dark in a dark theme.
+
 ## 1.10.1
 
 * Fix autocomplete suggestions not appearing when typing inside brackets or quotation marks.

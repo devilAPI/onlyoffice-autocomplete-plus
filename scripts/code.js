@@ -46,6 +46,34 @@
 
 	dictionary.load("./dictionaries/words.txt");
 
+	// The list of suggestions is drawn by the editor with fixed light colors:
+	// these rules come after them and take the colors of the theme instead.
+	function applyTheme(theme)
+	{
+		if (!isStarted)
+			return;
+
+		theme = theme || {};
+		const isDark = theme.type === "dark";
+		const background = theme["background-normal"] || (isDark ? "#333333" : "#FFFFFF");
+		const text = theme["text-normal"] || (isDark ? "#D9D9D9" : "#373737");
+		const border = theme["border-regular-control"] || (isDark ? "#666666" : "#CFCFCF");
+		const highlight = theme["highlight-button-hover"] || (isDark ? "#555555" : "#D8DADC");
+
+		let style = document.getElementById("autocomplete_theme");
+		if (!style)
+		{
+			style = document.createElement("style");
+			style.id = "autocomplete_theme";
+		}
+		style.innerHTML = ".ih_main { border-color: " + border + "; background-color: " + background + "; }" +
+			" li, .li_selected, .li_selected:hover { color: " + text + "; }" +
+			" li:hover, .li_selected, .li_selected:hover { background-color: " + highlight + "; }";
+		// (again) at the end of the head, behind the rules of the editor
+		document.getElementsByTagName("head")[0].appendChild(style);
+		document.body.style.background = background;
+	}
+
 	// a button on the Plugins tab opens the settings
 	function registerMenus()
 	{
@@ -111,6 +139,7 @@
 
 		plugin.createInputHelper();
 		plugin.getInputHelper().createWindow();
+		applyTheme(plugin.theme);
 
 		plugin.attachToolbarMenuClickEvent("autocompleteSettings", windows.openSettings);
 		plugin.attachContextMenuClickEvent("autocompleteSettingsMenu", windows.openSettings);
@@ -124,6 +153,12 @@
 		registerMenus();
 
 		typing.start();
+	};
+
+	plugin.onThemeChanged = function(theme)
+	{
+		plugin.onThemeChangedBase(theme);
+		applyTheme(theme);
 	};
 
 	plugin.onTranslate = function()
