@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.12.1
+
+* Offer a text snippet only once its whole abbreviation is typed, not for the start of it.
+
 ## 1.12.0
 
 * Add text snippets: an abbreviation such as `mfg` suggests the text you have set for it (`Mit freundlichen Grüßen`). They are edited in the settings window.

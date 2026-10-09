@@ -70,15 +70,14 @@
 	}
 
 	// The snippets for the typed letters as items of the list. A snippet is
-	// offered for its whole abbreviation however short it is, and for the start
-	// of it once there are enough letters for suggestions.
-	function getSnippetItems(isLongEnough)
+	// offered once its whole abbreviation is typed, however short it is.
+	function getSnippetItems()
 	{
 		// the abbreviation is not the start of the text, so it has to be replaced
 		if (!editor.canReplaceTyped())
 			return [];
 
-		return store.findSnippets(currentWord, isLongEnough).map((snippet, index) => ({
+		return store.findSnippets(currentWord).map((snippet, index) => ({
 			id : SNIPPET_ID + index,
 			text : escapeHtml(snippet.abbreviation + " \u2192 " + snippet.text), // the list shows it as HTML
 			snippet : snippet.text
@@ -89,7 +88,7 @@
 	{
 		const isLongEnough = currentWord.length >= store.settings.minLength;
 		const words = isLongEnough ? dictionary.suggest(currentWord, editor.canReplaceTyped()) : [];
-		const items = getSnippetItems(isLongEnough).concat(words.map(word => ({ text : word })));
+		const items = getSnippetItems().concat(words.map(word => ({ text : word })));
 		if (items.length == 0)
 		{
 			hideSuggestions();

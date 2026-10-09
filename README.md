@@ -80,7 +80,7 @@ mfg = Mit freundlichen Grüßen
 tel = +49 30 1234567
 ```
 
-Type the abbreviation and the text is offered at the top of the suggestions as `mfg → Mit freundlichen Grüßen`; choose it to replace the abbreviation with the text. The whole abbreviation is enough however short it is, so `lg` works with *Letters before suggesting* at 3. An abbreviation is made of letters and digits, and a text is a single line. Snippets are not offered where the plugin cannot replace the typed letters (a PDF editor that does not allow it).
+Type the whole abbreviation and the text is offered at the top of the suggestions as `mfg → Mit freundlichen Grüßen`; choose it to replace the abbreviation with the text. The start of an abbreviation does not offer it. It is offered however short the abbreviation is, so `lg` works with *Letters before suggesting* at 3. An abbreviation is made of letters and digits, and a text is a single line. Snippets are not offered where the plugin cannot replace the typed letters (a PDF editor that does not allow it).
 
 ### Learned words
 

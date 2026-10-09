@@ -207,18 +207,11 @@
 		onCountsChanged();
 	}
 
-	// The snippets for the typed letters: the one they are the abbreviation of
-	// first, then, if withStarts, those whose abbreviation starts with them.
-	function findSnippets(typed, withStarts)
+	// the snippets the typed letters are the whole abbreviation of
+	function findSnippets(typed)
 	{
-		const prefix = typed.toLowerCase();
-		if (!prefix)
-			return [];
-
-		const exact = snippets.filter(snippet => snippet.key == prefix);
-		if (!withStarts)
-			return exact;
-		return exact.concat(snippets.filter(snippet => snippet.key != prefix && snippet.key.startsWith(prefix)));
+		const key = typed.toLowerCase();
+		return snippets.filter(snippet => snippet.key == key);
 	}
 
 	function saveUsage()
