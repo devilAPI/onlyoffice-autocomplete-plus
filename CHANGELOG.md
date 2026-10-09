@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.10.1
+
+* Fix autocomplete suggestions not appearing when typing inside brackets or quotation marks.
+
 ## 1.10.0
 
 * Add the selected word to the personal dictionary from the right-click menu.

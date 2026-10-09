@@ -36,7 +36,7 @@
 	const plugin = window.Asc.plugin;
 
 	const SELECTION_TIMEOUT = 300; // milliseconds
-	const WORD_EDGE = /^[\s.,;:!?"'()\[\]{}«»„“”‚‘’…]+|[\s.,;:!?"'()\[\]{}«»„“”‚‘’…]+$/g;
+	const WORD_EDGE = /^[\s.,;:!?"'()\[\]{}«»„“”‚‘’‹›…<>]+|[\s.,;:!?"'()\[\]{}«»„“”‚‘’‹›…<>]+$/g;
 
 	function isPdf()
 	{

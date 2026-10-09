@@ -91,10 +91,10 @@
 		showSuggestions();
 	}
 
-	// the last word of a text: what follows the last space, full stop or comma
+	// the last word of a text: what follows the last space, punctuation, bracket or quote
 	function getLastWord(text)
 	{
-		return (typeof text === "string") ? /[^\s.,]*$/.exec(text)[0] : "";
+		return (typeof text === "string") ? /[^\s.,;:!?"'()\[\]{}«»„“”‚‘’‹›…<>\/\\|]*$/.exec(text)[0] : "";
 	}
 
 	function getTextToWrite(item)
@@ -191,7 +191,7 @@
 		setTyped : function(text)
 		{
 			this.typed = text.slice(-200);
-			currentWord = this.typed.substr(this.typed.lastIndexOf(" ") + 1);
+			currentWord = getLastWord(this.typed);
 		},
 
 		// the editor's input starts where the typed text ends now
@@ -283,7 +283,7 @@
 			}
 
 			this.setBase(before + written);
-			accepted = written;
+			accepted = item.text;
 			hideSuggestions();
 		}
 	};
