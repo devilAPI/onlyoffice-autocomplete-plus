@@ -110,9 +110,14 @@
 		const prefix = typed.toLowerCase();
 		const result = [];
 
+		// a capital letter behind the first one was typed by accident ("HAu"): no word is written like that
+		const hasSlip = canReplace && typed.substr(1) != prefix.substr(1);
+
 		// the word in the case of the typed text
 		function complete(word)
 		{
+			if (hasSlip)
+				return typed.charAt(0) + word.substr(1);
 			return typed + word.substr(prefix.length);
 		}
 

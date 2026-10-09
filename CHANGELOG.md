@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.11.1
+
+* Fix suggestions with two capital letters at the start, such as `HAuptsächlich` for `HAu`: the second capital letter is taken as typed by accident and the word is written `Hauptsächlich`.
+
 ## 1.11.0
 
 * Show the list of suggestions in the colors of the editor theme, so that it is dark in a dark theme.
