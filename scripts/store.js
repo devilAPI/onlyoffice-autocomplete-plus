@@ -36,6 +36,7 @@
 
 	const SETTINGS_KEY = "onlyoffice_autocomplete_settings";
 	const USAGE_KEY = "onlyoffice_autocomplete_usage";
+	const SNIPPETS_KEY = "onlyoffice_autocomplete_snippets";
 	const LIST_KEYS = {
 		personal : "onlyoffice_autocomplete_personal", // suggested before the word list and written as entered
 		ignored : "onlyoffice_autocomplete_ignored"    // never suggested
@@ -60,6 +61,7 @@
 	let settings = checkSettings(readJson(SETTINGS_KEY), DEFAULTS);
 	const lists = { personal : [], ignored : [] };
 	let ignored = new Set();          // lower-case ignored words
+	let snippets = [];                // { abbreviation, key, text }: the text is written for the abbreviation
 	let usage = Object.create(null);  // how often each suggestion was chosen: lower-case word -> count
 
 	function read(key)
@@ -174,6 +176,51 @@
 		saveList("ignored", lists.ignored.concat([word.toLowerCase()]).join("\n"));
 	}
 
+	// the snippets of a text with a line "abbreviation = text" for each, each abbreviation once
+	function parseSnippets(text)
+	{
+		const result = [];
+		const used = new Set();
+		for (const line of String(text || "").split(/\r?\n/))
+		{
+			if (result.length >= LIST_MAX)
+				break;
+
+			const match = /^\s*([^\s=]+)\s*=\s*(.*\S)\s*$/.exec(line);
+			if (!match || used.has(match[1].toLowerCase()))
+				continue;
+			used.add(match[1].toLowerCase());
+			result.push({ abbreviation : match[1], key : match[1].toLowerCase(), text : match[2] });
+		}
+		return result;
+	}
+
+	function getSnippetsText()
+	{
+		return snippets.map(snippet => snippet.abbreviation + " = " + snippet.text).join("\n");
+	}
+
+	function saveSnippets(text)
+	{
+		snippets = parseSnippets(text);
+		write(SNIPPETS_KEY, getSnippetsText());
+		onCountsChanged();
+	}
+
+	// The snippets for the typed letters: the one they are the abbreviation of
+	// first, then, if withStarts, those whose abbreviation starts with them.
+	function findSnippets(typed, withStarts)
+	{
+		const prefix = typed.toLowerCase();
+		if (!prefix)
+			return [];
+
+		const exact = snippets.filter(snippet => snippet.key == prefix);
+		if (!withStarts)
+			return exact;
+		return exact.concat(snippets.filter(snippet => snippet.key != prefix && snippet.key.startsWith(prefix)));
+	}
+
 	function saveUsage()
 	{
 		write(USAGE_KEY, JSON.stringify(usage));
@@ -244,12 +291,14 @@
 		return {
 			personal : lists.personal.length,
 			ignored : lists.ignored.length,
+			snippets : snippets.length,
 			learned : Object.keys(usage).length
 		};
 	}
 
 	for (const name in LIST_KEYS)
 		setList(name, read(LIST_KEYS[name]));
+	snippets = parseSnippets(read(SNIPPETS_KEY));
 	loadUsage();
 
 	const api = {
@@ -263,6 +312,11 @@
 		addPersonal : addPersonal,
 		isIgnored : key => ignored.has(key),
 		ignore : ignore,
+
+		// the text snippets, edited as a text with a line for each
+		getSnippetsText : getSnippetsText,
+		saveSnippets : saveSnippets,
+		findSnippets : findSnippets,
 
 		getUseCount : key => usage[key] || 0,
 		recordUse : recordUse,

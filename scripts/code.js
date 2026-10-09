@@ -68,7 +68,9 @@
 		}
 		style.innerHTML = ".ih_main { border-color: " + border + "; background-color: " + background + "; }" +
 			" li, .li_selected, .li_selected:hover { color: " + text + "; }" +
-			" li:hover, .li_selected, .li_selected:hover { background-color: " + highlight + "; }";
+			" li:hover, .li_selected, .li_selected:hover { background-color: " + highlight + "; }" +
+			// a long text snippet is cut off at the end of its row
+			" li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }";
 		// (again) at the end of the head, behind the rules of the editor
 		document.getElementsByTagName("head")[0].appendChild(style);
 		document.body.style.background = background;

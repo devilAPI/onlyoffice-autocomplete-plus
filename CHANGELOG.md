@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.12.0
+
+* Add text snippets: an abbreviation such as `mfg` suggests the text you have set for it (`Mit freundlichen Grüßen`). They are edited in the settings window.
+
 ## 1.11.1
 
 * Fix suggestions with two capital letters at the start, such as `HAuptsächlich` for `HAu`: the second capital letter is taken as typed by accident and the word is written `Hauptsächlich`.

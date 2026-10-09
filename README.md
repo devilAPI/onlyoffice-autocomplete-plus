@@ -13,6 +13,7 @@ A plugin for ONLYOFFICE editors that suggests German and English words while you
 | German nouns | - | Capitalised (`hau` → `Haus`) |
 | Personal dictionary | - | Yes |
 | Ignored words | - | Yes |
+| Text snippets | - | Yes (`mfg` → `Mit freundlichen Grüßen`) |
 | Learns the words you choose | - | Yes |
 | Continues a word after backspace | - | Yes |
 | Settings window | - | Yes |
@@ -70,6 +71,17 @@ To add a word from your text, select it, right-click and choose **Add "…" to p
 
 To stop a word from being suggested, right-click it in the list of suggestions. To review the ignored words or bring one back, click **Edit** next to *Ignored words* in the settings window.
 
+### Text snippets
+
+In the settings window, click **Edit** next to *Text snippets* and enter an abbreviation and its text on each line:
+
+```
+mfg = Mit freundlichen Grüßen
+tel = +49 30 1234567
+```
+
+Type the abbreviation and the text is offered at the top of the suggestions as `mfg → Mit freundlichen Grüßen`; choose it to replace the abbreviation with the text. The whole abbreviation is enough however short it is, so `lg` works with *Letters before suggesting* at 3. An abbreviation is made of letters and digits, and a text is a single line. Snippets are not offered where the plugin cannot replace the typed letters (a PDF editor that does not allow it).
+
 ### Learned words
 
 The plugin remembers each suggestion you choose. A word you have chosen at least twice is shown before the others: the more often you pick a word, the higher it appears. In the settings window, **Edit** next to *Learned words* lists them with the number of times you chose each; delete a line to forget that word. **Reset** forgets them all.
@@ -81,13 +93,13 @@ The settings, both word lists and the learned words are stored in the editor on 
 | Path | Content |
 |---|---|
 | `index.html`, `scripts/code.js` | The background plugin: starts the parts below, toolbar button and context menu item |
-| `scripts/store.js` | The settings, the personal dictionary, the ignored words and the learned words |
+| `scripts/store.js` | The settings, the personal dictionary, the ignored words, the text snippets and the learned words |
 | `scripts/dictionary.js` | Loads the word list and finds the suggestions for the typed letters |
 | `scripts/editor.js` | What the plugin can do in the editor it runs in, and writing into the PDF editor |
 | `scripts/typing.js` | Follows the word in front of the cursor, shows the suggestions and writes the chosen one |
 | `scripts/windows.js` | Opens the settings window and the word list editor and saves what they return |
 | `settings.html`, `scripts/settings.js` | The settings window |
-| `wordlist.html`, `scripts/wordlist.js` | The editor for the personal dictionary, the ignored words and the learned words |
+| `wordlist.html`, `scripts/wordlist.js` | The editor for the personal dictionary, the ignored words, the text snippets and the learned words |
 | `dictionaries/words.txt` | The word list |
 | `translations/` | Interface translations |
 | `tools/build_words.py` | Builds the word list |

@@ -50,6 +50,7 @@
 	const KEY_DELETE = 46;
 	const LIST_WIDTH = 180;
 	const LIST_ROWS = 5;
+	const SNIPPET_ID = "snippet_"; // the ids of the snippets in the list start with it
 
 	let readsDocument = false; // the document can be asked
 	let isPaused = false;      // switched off by the user until it is resumed or the editor is restarted
@@ -63,18 +64,41 @@
 		plugin.getInputHelper().unShow();
 	}
 
+	function escapeHtml(text)
+	{
+		return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	}
+
+	// The snippets for the typed letters as items of the list. A snippet is
+	// offered for its whole abbreviation however short it is, and for the start
+	// of it once there are enough letters for suggestions.
+	function getSnippetItems(isLongEnough)
+	{
+		// the abbreviation is not the start of the text, so it has to be replaced
+		if (!editor.canReplaceTyped())
+			return [];
+
+		return store.findSnippets(currentWord, isLongEnough).map((snippet, index) => ({
+			id : SNIPPET_ID + index,
+			text : escapeHtml(snippet.abbreviation + " \u2192 " + snippet.text), // the list shows it as HTML
+			snippet : snippet.text
+		}));
+	}
+
 	function showSuggestions()
 	{
-		const words = (currentWord.length < store.settings.minLength) ? [] : dictionary.suggest(currentWord, editor.canReplaceTyped());
-		if (words.length == 0)
+		const isLongEnough = currentWord.length >= store.settings.minLength;
+		const words = isLongEnough ? dictionary.suggest(currentWord, editor.canReplaceTyped()) : [];
+		const items = getSnippetItems(isLongEnough).concat(words.map(word => ({ text : word })));
+		if (items.length == 0)
 		{
 			hideSuggestions();
 			return;
 		}
 
 		const list = plugin.getInputHelper();
-		list.setItems(words.map(word => ({ text : word })));
-		const height = Math.min(list.getScrollSizes().h, list.getItemsHeight(Math.min(LIST_ROWS, words.length)));
+		list.setItems(items);
+		const height = Math.min(list.getScrollSizes().h, list.getItemsHeight(Math.min(LIST_ROWS, items.length)));
 		list.show(LIST_WIDTH, height, false);
 	}
 
@@ -99,7 +123,24 @@
 
 	function getTextToWrite(item)
 	{
-		return store.settings.addSpace ? item.text + " " : item.text;
+		const text = item.snippet || item.text;
+		return store.settings.addSpace ? text + " " : text;
+	}
+
+	// to be called when the item was written
+	function onWritten(item)
+	{
+		if (item.snippet)
+		{
+			// no suggestions for the last word of the snippet, which now stands in front of the cursor
+			accepted = getLastWord(item.snippet);
+		}
+		else
+		{
+			store.recordUse(item.text);
+			accepted = item.text;
+		}
+		hideSuggestions();
 	}
 
 	const documentWord = {
@@ -169,10 +210,8 @@
 					return;
 				}
 
-				store.recordUse(item.text);
 				plugin.executeMethod("InputText", [getTextToWrite(item), word]);
-				accepted = item.text;
-				hideSuggestions();
+				onWritten(item);
 			});
 		}
 	};
@@ -263,8 +302,6 @@
 
 		onSelect : function(item)
 		{
-			store.recordUse(item.text);
-
 			const letters = currentWord;
 			const before = this.typed.slice(0, this.typed.length - letters.length);
 			let written = getTextToWrite(item);
@@ -283,8 +320,7 @@
 			}
 
 			this.setBase(before + written);
-			accepted = item.text;
-			hideSuggestions();
+			onWritten(item);
 		}
 	};
 
@@ -318,6 +354,10 @@
 
 		e.preventDefault();
 		e.stopPropagation();
+
+		// a snippet is removed in the settings
+		if (target.id.indexOf(SNIPPET_ID) === 0)
+			return;
 
 		const word = (target.innerText || "").replace(/\s+/g, "").toLowerCase();
 		if (!word || store.isIgnored(word))

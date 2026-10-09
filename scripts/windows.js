@@ -52,6 +52,11 @@
 			description : "Words that are never suggested, one per line.",
 			hint : "Right-click a suggestion while typing to add it here. Delete a line to have the word suggested again."
 		},
+		snippets : {
+			title : "Text snippets",
+			description : "Abbreviations and the text to write for them, one per line: abbreviation = text.",
+			hint : "Type the abbreviation and choose the text from the suggestions. An abbreviation cannot contain spaces or punctuation. Delete a line to remove the snippet."
+		},
 		learned : {
 			title : "Learned words",
 			description : "The words you have chosen, most chosen first.",
@@ -124,8 +129,8 @@
 		}
 	}
 
-	const settingsDialog = new Dialog("settings.html", [320, 446]);
-	const listDialog = new Dialog("wordlist.html", [320, 380]);
+	const settingsDialog = new Dialog("settings.html", [320, 474]);
+	const listDialog = new Dialog("wordlist.html", [380, 380]);
 	let listName = ""; // the list that is being edited
 
 	function sendCounts()
@@ -135,6 +140,8 @@
 
 	function getListText(name)
 	{
+		if (name == "snippets")
+			return store.getSnippetsText();
 		if (name != "learned")
 			return store.getList(name).join("\n");
 
@@ -144,7 +151,9 @@
 
 	function setListText(name, text)
 	{
-		if (name == "learned")
+		if (name == "snippets")
+			store.saveSnippets(text);
+		else if (name == "learned")
 			store.setLearned(text);
 		else
 			store.saveList(name, text);
